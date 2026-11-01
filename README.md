@@ -6,7 +6,7 @@
 
   [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg?style=for-the-badge)](LICENSE)
   [![Streamlit Live](https://img.shields.io/badge/Status-Live_Online-10b981.svg?style=for-the-badge&logo=streamlit&logoColor=white)](https://purevoice-ai-bdyxyer2hovudzsgb5g2er.streamlit.app/)
-  [![Release: v1.0.0](https://img.shields.io/badge/Release-v1.0.0-blue.svg?style=for-the-badge)](https://github.com/rajvisual/purevoice-ai/releases)
+  [![Release: v1.1.0](https://img.shields.io/badge/Release-v1.1.0-blue.svg?style=for-the-badge)](https://github.com/rajvisual/purevoice-ai/releases)
 
   <br/><br/>
 
@@ -61,25 +61,23 @@ Use the tool directly in your browser without installing anything:
 [Raw Audio / Video]
         │
         ▼
-1. 85 Hz High-Pass Filter  ──► Cuts desk thumps, wind rumble, and low AC drone
+0. Smart Acoustic Scan     ──► Scans dynamic range & ambient noise in < 0.05s
+        │                      to auto-calculate optimal dB cut and vocal polish %
+        ▼
+1. 65 Hz High-Pass Filter  ──► Eliminates wind rumble and desk thumps without cutting chest voice
         │
         ▼
-2. De-Clicker & Transient  ──► Eliminates saliva clicks, keyboard taps, and pops
+2. AI / Spectral Denoising ──► Wipes away continuous noise floor (AC drone, fans, street hiss)
+        │                      with smooth gain transition to eliminate musical chirping
+        ▼
+3. Studio Vocal Enhancer   ──► 160Hz proximity warmth + 380Hz boxiness notch + 3.4kHz vocal
+        │                      presence formants + 9.5kHz condenser air sheen
+        ▼
+4. Dynamic Speech Leveler  ──► Normalizes quiet speech while keeping pauses completely silent
         │
         ▼
-3. Adaptive FFT / Spectral ──► Dynamic tracking profiles and eliminates background
-   Noise Suppression           hiss, hum, and static
-        │
-        ▼
-4. Vocal Presence Formant  ──► Boosts 3.2 kHz intelligibility band & cuts 300Hz mud
-   Equalizer                   (gives the signature studio clarity)
-        │
-        ▼
-5. Dynamic Speech Leveler  ──► Normalizes quiet speech while limiting loud peaks
-        │
-        ▼
-6. Lossless Remux (-c:v copy)► Video track is copied 1:1 without transcoding.
-                               Instant export, 100% 4K/HD video quality preserved!
+5. Lossless Remux (-c:v copy)► Video stream copied 1:1 without transcoding.
+                               Instant export, 100% 4K/60FPS video quality preserved!
 ```
 
 ---
