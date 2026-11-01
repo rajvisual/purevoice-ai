@@ -214,5 +214,13 @@ class PureVoiceDenoiser:
             }
 
 if __name__ == "__main__":
-    denoiser = PureVoiceDenoiser()
-    print("PureVoice AI Engine initialized successfully.")
+    # If Streamlit Cloud runs this file directly as the entry point:
+    try:
+        import streamlit as st
+        root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        if root_dir not in sys.path:
+            sys.path.insert(0, root_dir)
+        import streamlit_app
+    except Exception as e:
+        denoiser = PureVoiceDenoiser()
+        print("PureVoice AI Engine initialized successfully.")
