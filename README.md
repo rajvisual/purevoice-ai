@@ -3,8 +3,9 @@ title: PureVoice AI
 emoji: 🎙️
 colorFrom: purple
 colorTo: pink
-sdk: docker
-app_port: 7860
+sdk: gradio
+sdk_version: 4.28.3
+app_file: app.py
 pinned: false
 license: mit
 ---
