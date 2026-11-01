@@ -1,3 +1,14 @@
+---
+title: PureVoice AI
+emoji: 🎙️
+colorFrom: purple
+colorTo: pink
+sdk: docker
+app_port: 7860
+pinned: false
+license: mit
+---
+
 <div align="center">
 
   <img src="assets/banner.svg" alt="PureVoice AI Banner" width="100%" />

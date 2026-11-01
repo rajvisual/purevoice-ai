@@ -1,20 +1,28 @@
 FROM python:3.12-slim
 
-# Install system dependencies (FFmpeg is required for audio & video processing)
+# Install system dependencies (FFmpeg for audio & video processing)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
+# Set up user for Hugging Face Spaces (UID 1000)
+RUN useradd -m -u 1000 user
+USER user
+ENV HOME=/home/user \
+    PATH=/home/user/.local/bin:$PATH \
+    PORT=7860
 
-# Copy application files
-COPY . /app
+WORKDIR $HOME/app
 
-# Create upload and output directories
-RUN mkdir -p /app/uploads /app/outputs
+# Copy application files with ownership
+COPY --chown=user . $HOME/app
 
-# Expose port 8000 (standard web port, can be overridden by $PORT)
-EXPOSE 8000
+# Ensure writable upload and output directories
+RUN mkdir -p $HOME/app/uploads $HOME/app/outputs && \
+    chmod -R 777 $HOME/app/uploads $HOME/app/outputs
 
-# Start server
-CMD ["python", "server.py", "8000"]
+# Expose Hugging Face default port
+EXPOSE 7860
+
+# Launch server
+CMD ["python", "server.py", "7860"]
