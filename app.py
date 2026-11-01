@@ -214,35 +214,37 @@ with tab_video:
 
         if is_auto_video:
             st.info("💡 **Smart Auto Active**: The AI will scan your audio's dynamic range and noise floor to automatically compute the exact noise reduction dB and vocal enhancement % needed.")
-            reduction_depth = 12
+            reduction_depth = 11
             enhance_voice_toggle = True
-            voice_strength = 80
+            voice_strength = 70
             chosen_preset = "creator"
         else:
             st.markdown("**🔇 Reduce Noise**")
             reduction_depth = st.slider(
                 "Noise Suppression Depth (dB)",
                 min_value=6,
-                max_value=24,
-                value=12,
+                max_value=20,
+                value=11,
                 step=1,
-                key="video_slider"
+                key="video_slider",
+                help="11 dB is the ideal sweet spot for natural human voice without robotic artifacts."
             )
 
             st.markdown("**✨ Enhance Voice**")
             enhance_voice_toggle = st.toggle(
                 "Enable Studio Voice Polish",
                 value=True,
-                key="video_enhance_toggle"
+                key="video_enhance_toggle",
+                help="Adds proximity warmth, vocal clarity formants, and broadcast leveling."
             )
 
-            voice_strength = 80
+            voice_strength = 70
             if enhance_voice_toggle:
                 voice_strength = st.slider(
                     "Voice Enhancement Intensity (%)",
                     min_value=10,
                     max_value=100,
-                    value=80,
+                    value=70,
                     step=5,
                     key="video_voice_slider"
                 )
@@ -331,35 +333,37 @@ with tab_audio:
 
         if is_auto_audio:
             st.info("💡 **Smart Auto Active**: The AI will scan your audio's dynamic range and noise floor to automatically compute the exact noise reduction dB and vocal enhancement % needed.")
-            reduction_audio_depth = 12
+            reduction_audio_depth = 11
             enhance_audio_toggle = True
-            voice_audio_strength = 80
+            voice_audio_strength = 70
             chosen_audio_preset = "creator"
         else:
             st.markdown("**🔇 Reduce Noise**")
             reduction_audio_depth = st.slider(
                 "Noise Suppression Depth (dB)",
                 min_value=6,
-                max_value=24,
-                value=12,
+                max_value=20,
+                value=11,
                 step=1,
-                key="audio_slider"
+                key="audio_slider",
+                help="11 dB is the ideal sweet spot for natural human voice without robotic artifacts."
             )
 
             st.markdown("**✨ Enhance Voice**")
             enhance_audio_toggle = st.toggle(
                 "Enable Studio Voice Polish",
                 value=True,
-                key="audio_enhance_toggle"
+                key="audio_enhance_toggle",
+                help="Adds proximity warmth, vocal clarity formants, and broadcast leveling."
             )
 
-            voice_audio_strength = 80
+            voice_audio_strength = 70
             if enhance_audio_toggle:
                 voice_audio_strength = st.slider(
                     "Voice Enhancement Intensity (%)",
                     min_value=10,
                     max_value=100,
-                    value=80,
+                    value=70,
                     step=5,
                     key="audio_voice_slider"
                 )
