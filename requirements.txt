@@ -1,2 +1,4 @@
-streamlit>=1.32.0
+# Hugging Face runtime dependencies
+# Current processor is FFmpeg filter-based; neural model dependencies are not integrated.
+streamlit>=1.32,<2
 imageio-ffmpeg>=0.4.9

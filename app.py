@@ -179,7 +179,16 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-denoiser = PureVoiceDenoiser()
+try:
+    denoiser = PureVoiceDenoiser()
+except Exception as exc:
+    denoiser = None
+    ENGINE_INIT_ERROR = str(exc)
+else:
+    ENGINE_INIT_ERROR = None
+
+if ENGINE_INIT_ERROR:
+    st.error(f"Audio engine unavailable: {ENGINE_INIT_ERROR}")
 
 # Preset configuration
 PRESET_MAP = {
@@ -228,10 +237,11 @@ with tab_video:
 
         st.caption("⚡ **Lossless Remuxing**: Your video is never re-compressed. Only audio is cleaned, preserving 100% 4K/60FPS video quality in seconds.")
 
-        if video_file is not None:
+        if video_file is not None and denoiser is not None:
             if st.button("✨ Clean Video with PureVoice AI", key="btn_run_video"):
                 with st.spinner("Suppressing noise and mastering vocals..."):
-                    with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{video_file.name}") as tmp_in:
+                    safe_suffix = os.path.splitext(os.path.basename(video_file.name))[1].lower() or ".bin"
+                    with tempfile.NamedTemporaryFile(delete=False, suffix=safe_suffix) as tmp_in:
                         tmp_in.write(video_file.read())
                         input_path = tmp_in.name
 
@@ -296,10 +306,11 @@ with tab_audio:
             key="audio_slider"
         )
 
-        if audio_file is not None:
+        if audio_file is not None and denoiser is not None:
             if st.button("✨ Clean Audio with PureVoice AI", key="btn_run_audio"):
                 with st.spinner("Isolating vocals and removing background noise..."):
-                    with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{audio_file.name}") as tmp_in:
+                    safe_suffix = os.path.splitext(os.path.basename(audio_file.name))[1].lower() or ".bin"
+                    with tempfile.NamedTemporaryFile(delete=False, suffix=safe_suffix) as tmp_in:
                         tmp_in.write(audio_file.read())
                         input_path = tmp_in.name
 

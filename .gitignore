@@ -19,3 +19,8 @@ outputs/*
 Thumbs.db
 .vscode/
 .idea/
+
+# Secrets
+.env
+.env.*
+!.env.example
