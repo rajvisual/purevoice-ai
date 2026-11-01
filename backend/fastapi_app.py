@@ -1,6 +1,6 @@
 """
-FastAPI Production Implementation for InstaEdit Audio/Video Denoiser
-===================================================================
+FastAPI Production Implementation for PureVoice AI Denoiser
+===========================================================
 Run with: uvicorn backend.fastapi_app:app --host 0.0.0.0 --port 8000 --reload
 """
 
@@ -10,7 +10,7 @@ from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from .denoiser_engine import InstaAudioDenoiser
+from .denoiser_engine import PureVoiceDenoiser
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
@@ -20,7 +20,7 @@ FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-app = FastAPI(title="InstaEdit AI Audio & Video Noise Reducer")
+app = FastAPI(title="PureVoice AI - Audio & Video Noise Reducer")
 
 app.add_middleware(
     CORSMiddleware,
@@ -30,7 +30,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-denoiser = InstaAudioDenoiser()
+denoiser = PureVoiceDenoiser()
 
 @app.get("/")
 def read_root():

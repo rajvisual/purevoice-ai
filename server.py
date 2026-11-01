@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Instagram Audio/Video Noise Reduction Web Server
-================================================
+PureVoice AI - Audio & Video Noise Reduction Web Server
+======================================================
 Zero-dependency Python HTTP Server with audio & video processing pipeline,
 range request streaming for video/audio seek, and REST endpoints.
 """
@@ -19,7 +19,7 @@ from email.message import EmailMessage
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(BASE_DIR, "backend"))
 
-from denoiser_engine import InstaAudioDenoiser
+from denoiser_engine import PureVoiceDenoiser
 
 UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
 OUTPUT_DIR = os.path.join(BASE_DIR, "outputs")
@@ -28,7 +28,7 @@ FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-denoiser_instance = InstaAudioDenoiser()
+denoiser_instance = PureVoiceDenoiser()
 
 class InstaDenoiserHandler(BaseHTTPRequestHandler):
     def send_cors_headers(self):
@@ -78,7 +78,7 @@ class InstaDenoiserHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Type", "application/json")
             self.send_cors_headers()
             self.end_headers()
-            self.wfile.write(json.dumps({"status": "ok", "service": "Insta Denoise AI"}).encode("utf-8"))
+            self.wfile.write(json.dumps({"status": "ok", "service": "PureVoice AI"}).encode("utf-8"))
             return
 
         self.send_error(404, "Not Found")
@@ -241,7 +241,7 @@ def run(host: str = "0.0.0.0", port: int = 8000):
     server_address = (host, port)
     httpd = HTTPServer(server_address, InstaDenoiserHandler)
     print(f"================================================================")
-    print(f"  Instagram Audio & Video Denoiser Web App running!")
+    print(f"  PureVoice AI - Audio & Video Noise Reducer running!")
     print(f"  Access URL: http://localhost:{port} (bound to {host})")
     print(f"================================================================")
     try:

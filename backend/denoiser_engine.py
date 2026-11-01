@@ -1,12 +1,11 @@
 """
-Instagram-Style Audio & Video Noise Reduction Engine
+PureVoice AI - Audio & Video Noise Reduction Engine
 ===================================================
-Implements the exact audio processing pipeline used by modern social creator apps
-(Instagram Reels 'Reduce Noise', TikTok 'Voice Filter', Adobe Podcast 'Enhance Speech'):
+Studio-grade vocal restoration and noise reduction pipeline:
 
 1. Audio Demuxing (Zero re-encode extraction from MP4, MOV, MKV, etc.)
-2. High-Pass Filter (80Hz rumble/wind suppression)
-3. De-clicking & Transient Suppression
+2. High-Pass Filter (85Hz rumble/wind suppression)
+3. De-clicking & Transient Suppression (adeclick)
 4. Adaptive FFT Spectral Gating / Neural Non-Local Means (suppresses hiss, hum, AC noise)
 5. Vocal Presence & Formant Equalizer (boosts vocal clarity in 2.5kHz - 4kHz range)
 6. Dynamic Speech Leveler & Normalization (levels whispered speech & limits harsh peaks)
@@ -22,7 +21,7 @@ from typing import Dict, Any, Optional
 AUDIO_EXTENSIONS = {'.mp3', '.wav', '.m4a', '.aac', '.flac', '.ogg', '.wma'}
 VIDEO_EXTENSIONS = {'.mp4', '.mov', '.avi', '.mkv', '.webm', '.m4v', '.3gp'}
 
-class InstaAudioDenoiser:
+class PureVoiceDenoiser:
     def __init__(self, ffmpeg_bin: str = "ffmpeg"):
         self.ffmpeg = ffmpeg_bin
         self._verify_ffmpeg()
@@ -41,17 +40,12 @@ class InstaAudioDenoiser:
         """
         Builds the FFmpeg audio filtergraph corresponding to the chosen preset.
         Presets:
-        - 'instagram': The Instagram Reels signature sound (noise cut + vocal clarity boost + auto-leveling)
+        - 'instagram': PureVoice Creator signature sound (noise cut + vocal clarity boost + auto-leveling)
         - 'studio': High noise reduction for noisy/traffic/crowded environments
         - 'subtle': Gentle noise reduction preserving natural room tone
         - 'wind_rumble': Special focus on wind, HVAC, and mic handling thumps
         """
         if preset == "instagram":
-            # 1. 80Hz HPF (mic rumble & AC hum)
-            # 2. adeclick (clicks/saliva/pops)
-            # 3. afftdn (adaptive FFT denoiser with tracking)
-            # 4. equalizer at 3.2kHz (+2.5dB vocal shine) & 300Hz (-1.5dB mud removal)
-            # 5. dynaudnorm (dynamic speech leveler)
             return (
                 f"highpass=f=85,"
                 f"adeclick,"
@@ -61,7 +55,6 @@ class InstaAudioDenoiser:
                 f"dynaudnorm=f=150:g=15:m=10:p=0.95"
             )
         elif preset == "studio":
-            # Deeper noise reduction, crisp podcast tone
             return (
                 f"highpass=f=95,"
                 f"adeclick,"
@@ -71,7 +64,6 @@ class InstaAudioDenoiser:
                 f"dynaudnorm=f=120:g=18:m=12:p=0.94"
             )
         elif preset == "wind_rumble":
-            # Strong rumble cleanup
             return (
                 f"highpass=f=120,"
                 f"afftdn=nr={custom_nr}:nf=-45:tn=1,"
@@ -95,7 +87,6 @@ class InstaAudioDenoiser:
         Processes audio or video input.
         If video: extracts audio, cleans it, remuxes with original video stream losslessly.
         If audio: cleans audio and outputs pristine WAV/MP3.
-        Returns metadata including output file paths and processing stats.
         """
         os.makedirs(output_dir, exist_ok=True)
         filename = os.path.basename(input_path)
@@ -106,12 +97,9 @@ class InstaAudioDenoiser:
         filter_str = self.get_filter_chain(preset=preset, custom_nr=reduction_level)
         
         if is_vid:
-            # Output 1: Denoised Video (.mp4)
-            # Output 2: Extracted audio files for instant A/B waveform comparison in the browser
-            denoised_video_filename = f"{base_name}_insta_cleaned_{unique_id}.mp4"
+            denoised_video_filename = f"{base_name}_purevoice_clean_{unique_id}.mp4"
             denoised_video_path = os.path.join(output_dir, denoised_video_filename)
             
-            # Extract original audio as AAC/WAV for browser comparison
             orig_audio_filename = f"{base_name}_orig_audio_{unique_id}.mp3"
             orig_audio_path = os.path.join(output_dir, orig_audio_filename)
             
@@ -136,7 +124,6 @@ class InstaAudioDenoiser:
             subprocess.run(cmd_clean_audio, capture_output=True, check=True)
 
             # Step C: Remux cleaned audio with original video without re-encoding video (-c:v copy)
-            # This is 100x faster than re-rendering video and keeps 100% video quality!
             cmd_remux = [
                 self.ffmpeg, "-y",
                 "-i", input_path,
@@ -163,15 +150,13 @@ class InstaAudioDenoiser:
             }
 
         else:
-            # Audio input: output cleaned WAV & MP3
-            output_audio_filename = f"{base_name}_insta_cleaned_{unique_id}.mp3"
+            output_audio_filename = f"{base_name}_purevoice_clean_{unique_id}.mp3"
             output_audio_path = os.path.join(output_dir, output_audio_filename)
             
-            # Also save an original MP3 copy for web player comparison if input was wav/other
             orig_audio_filename = f"{base_name}_orig_{unique_id}.mp3"
             orig_audio_path = os.path.join(output_dir, orig_audio_filename)
             
-            # Step A: Convert/copy original to previewable MP3
+            # Step A: Original MP3
             cmd_orig = [
                 self.ffmpeg, "-y", "-i", input_path,
                 "-c:a", "libmp3lame", "-b:a", "192k",
@@ -179,7 +164,7 @@ class InstaAudioDenoiser:
             ]
             subprocess.run(cmd_orig, capture_output=True, check=True)
 
-            # Step B: Apply Denoise filter chain
+            # Step B: Cleaned Audio
             cmd_clean = [
                 self.ffmpeg, "-y", "-i", input_path,
                 "-af", filter_str,
@@ -201,5 +186,5 @@ class InstaAudioDenoiser:
             }
 
 if __name__ == "__main__":
-    denoiser = InstaAudioDenoiser()
-    print("InstaAudioDenoiser Engine initialized successfully.")
+    denoiser = PureVoiceDenoiser()
+    print("PureVoice AI Engine initialized successfully.")
