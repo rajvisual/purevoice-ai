@@ -1,7 +1,8 @@
-# Hugging Face Gradio Deployment (Zero-Docker, 100% Free)
+# Core web frameworks (Both Streamlit and Gradio supported for free 1-click cloud deploy)
+streamlit>=1.32.0
 gradio>=4.20.0
 
-# Optional production packages
+# Optional API deployment
 fastapi>=0.110.0
 uvicorn>=0.28.0
 python-multipart>=0.0.9
