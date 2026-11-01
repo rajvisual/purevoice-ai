@@ -1,0 +1,10 @@
+# Core dependencies (Optional - the built-in server.py works with 0 pip dependencies using FFmpeg + Python standard library!)
+fastapi>=0.110.0
+uvicorn>=0.28.0
+python-multipart>=0.0.9
+
+# Advanced Deep Learning Models (Optional - for running Meta AI Denoiser or DeepFilterNet)
+# torch>=2.0.0
+# torchaudio>=2.0.0
+# deepfilternet>=0.5.6
+# denoiser>=0.1.5
