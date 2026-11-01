@@ -219,9 +219,9 @@ with tab_video:
 
         reduction_depth = st.slider(
             "Noise Suppression Depth (dB)",
-            min_value=10,
-            max_value=32,
-            value=18,
+            min_value=6,
+            max_value=24,
+            value=12,
             step=1,
             key="video_slider"
         )
@@ -289,9 +289,9 @@ with tab_audio:
 
         reduction_audio_depth = st.slider(
             "Noise Suppression Depth (dB)",
-            min_value=10,
-            max_value=32,
-            value=18,
+            min_value=6,
+            max_value=24,
+            value=12,
             step=1,
             key="audio_slider"
         )

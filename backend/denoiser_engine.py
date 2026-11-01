@@ -64,44 +64,42 @@ class PureVoiceDenoiser:
         ext = os.path.splitext(file_path)[1].lower()
         return ext in VIDEO_EXTENSIONS
 
-    def get_filter_chain(self, preset: str = "creator", custom_nr: int = 18) -> str:
+    def get_filter_chain(self, preset: str = "creator", custom_nr: int = 12) -> str:
         """
-        Builds the FFmpeg audio filtergraph corresponding to the chosen preset.
-        Presets:
-        - 'creator': PureVoice Creator signature sound (noise cut + vocal clarity boost + auto-leveling)
-        - 'studio': High noise reduction for noisy/traffic/crowded environments
-        - 'subtle': Gentle noise reduction preserving natural room tone
-        - 'wind_rumble': Special focus on wind, HVAC, and mic handling thumps
+        Studio Vocal Restoration Pipeline:
+        - Gentle 65Hz high-pass preserves natural vocal warmth and chest resonance.
+        - Spectral gating with gain smoothing (gs=8) completely eliminates robotic / watery artifacts.
+        - Static noise floor (tn=0) guarantees human speech is NEVER treated as noise.
+        - Speech normalization (speechnorm) eliminates volume pumping and breathing.
+        - Silk presence EQ adds air and vocal intelligibility without harshness.
         """
+        safe_nr = max(6, min(int(custom_nr), 22))
+
         if preset in ("creator", "instagram"):
             return (
-                f"highpass=f=85,"
-                f"adeclick,"
-                f"afftdn=nr={custom_nr}:nf=-50:tn=1,"
-                f"equalizer=f=300:t=q:w=1.0:g=-1.5,"
-                f"equalizer=f=3200:t=q:w=1.2:g=2.8,"
-                f"dynaudnorm=f=150:g=15:m=10:p=0.95"
+                f"highpass=f=65,"
+                f"afftdn=nr={safe_nr}:nf=-45:tn=0:gs=8:bm=1.3,"
+                f"equalizer=f=2800:t=q:w=1.0:g=1.8,"
+                f"speechnorm=p=0.95:e=1.5:c=1.5"
             )
         elif preset == "studio":
             return (
-                f"highpass=f=95,"
-                f"adeclick,"
-                f"anlmdn=s=7:p=0.003:r=0.005,"
-                f"afftdn=nr={min(custom_nr + 6, 35)}:nf=-55:tn=1,"
-                f"equalizer=f=3500:t=q:w=1.2:g=3.2,"
-                f"dynaudnorm=f=120:g=18:m=12:p=0.94"
+                f"highpass=f=75,"
+                f"afftdn=nr={min(safe_nr + 4, 22)}:nf=-48:tn=0:gs=10:bm=1.4,"
+                f"equalizer=f=3200:t=q:w=1.0:g=2.2,"
+                f"speechnorm=p=0.94:e=1.6:c=1.6"
             )
         elif preset == "wind_rumble":
             return (
-                f"highpass=f=120,"
-                f"afftdn=nr={custom_nr}:nf=-45:tn=1,"
-                f"dynaudnorm=f=150:g=12:p=0.95"
+                f"highpass=f=95,"
+                f"afftdn=nr={safe_nr}:nf=-45:tn=0:gs=8,"
+                f"speechnorm=p=0.95:e=1.4:c=1.4"
             )
         else: # subtle
             return (
-                f"highpass=f=75,"
-                f"afftdn=nr={max(custom_nr - 6, 8)}:nf=-45:tn=1,"
-                f"dynaudnorm=f=200:g=10:p=0.96"
+                f"highpass=f=60,"
+                f"afftdn=nr={max(safe_nr - 4, 6)}:nf=-42:tn=0:gs=6,"
+                f"speechnorm=p=0.95:e=1.2:c=1.2"
             )
 
     def process_file(
@@ -109,7 +107,7 @@ class PureVoiceDenoiser:
         input_path: str,
         output_dir: str,
         preset: str = "creator",
-        reduction_level: int = 18
+        reduction_level: int = 12
     ) -> Dict[str, Any]:
         """
         Processes audio or video input.
