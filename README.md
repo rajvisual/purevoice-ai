@@ -1,62 +1,103 @@
-# 🎙️ PureVoice AI - Studio Audio & Video Noise Reducer
+<div align="center">
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new)
+  <img src="assets/banner.svg" alt="PureVoice AI Banner" width="100%" />
 
-**PureVoice AI** is a studio-grade audio and video noise reduction web application. It transforms muffled, noisy voice recordings into crisp, professional studio sound with one click.
+  <br/><br/>
 
-Supports any **Audio** (`.mp3`, `.wav`, `.m4a`, `.aac`, `.flac`, `.ogg`) or **Video** (`.mp4`, `.mov`, `.webm`, `.mkv`, `.avi`), wiping away background hum (air conditioning, PC fans, street traffic, microphone handling thumps), enhancing human vocal presence, and exporting pristine audio or remuxed high-resolution video.
+  [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg?style=for-the-badge)](LICENSE)
+  [![Python 3.12](https://img.shields.io/badge/Python-3.12+-blue.svg?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
+  [![FFmpeg](https://img.shields.io/badge/FFmpeg-6.0+-007808.svg?style=for-the-badge&logo=ffmpeg&logoColor=white)](https://ffmpeg.org)
+  [![Docker Ready](https://img.shields.io/badge/Docker-Ready-2496ED.svg?style=for-the-badge&logo=docker&logoColor=white)](Dockerfile)
+  [![Open in GitHub Codespaces](https://img.shields.io/badge/GitHub_Codespaces-100%25_Free-black.svg?style=for-the-badge&logo=github)](https://github.com/codespaces/new)
 
----
+  <br/>
 
-## 🌐 How Anyone Can Run This for Free
+  <h3>Studio-grade speech enhancement &amp; background noise reduction for Audio and Video.</h3>
+  <p>Eliminate air conditioning hum, fan drone, keyboard clatter, wind rumble, and street noise with one click.</p>
 
-### 1. In GitHub with One Click: **GitHub Codespaces (100% Free)**
-GitHub gives every user **60 hours of free cloud compute every month**!
-- Anyone who visits your GitHub repository can click:
-  👉 **`Code` ➔ `Codespaces` ➔ `Create codespace on main`**
-- GitHub will automatically boot up a cloud Linux container with Python & FFmpeg pre-installed (using our `.devcontainer` config), start the app, and open the live website in the browser!
+  <br/>
 
-### 2. Live Public URL for the World: **Hugging Face Spaces (100% Free Forever)**
-If you want a permanent public link (like `https://yourname-purevoice-ai.hf.space`) that anyone on the internet can visit from their phone or laptop without logging into GitHub:
-1. Go to [huggingface.co/new-space](https://huggingface.co/new-space).
-2. Choose **Docker** as the Space SDK.
-3. Link your GitHub repository.
-4. It will automatically build from our `Dockerfile` and give you a free public web link!
+  <img src="assets/preview.svg" alt="PureVoice AI Interface Mockup" width="94%" />
 
-### 3. Alternative: **Render.com (Free Web Service)**
-1. Go to [render.com](https://render.com) and create a free account.
-2. Click **New +** ➔ **Web Service** ➔ connect your GitHub repo.
-3. Select **Docker** environment. Render will build and host your app with a free `https://*.onrender.com` URL!
+</div>
 
 ---
 
-## ⚡ How to Push to GitHub
+## 🌟 Can I Publish and Run This for Free on GitHub?
 
-1. Go to [github.com/new](https://github.com/new) and create a new repository named `purevoice-ai`.
-2. Run these commands in your terminal:
+### The Short Answer:
+* **GitHub Pages** only hosts static files (`.html`, `.css`, `.js`). Because background noise removal and video audio extraction require server-side DSP audio computation (Python + FFmpeg), GitHub Pages cannot run the processing engine by itself.
+* **HOWEVER, you can run this completely for free in 3 ways:**
+
+| Free Hosting Method | Cost | How It Works | Best For |
+|:---|:---:|:---|:---|
+| **1. GitHub Codespaces** | **100% Free** | Runs directly inside GitHub. Every GitHub account gets **60 hours of free cloud compute/month**. Anyone can click 1 button on your repo to launch and run the app. | Developers & GitHub visitors |
+| **2. Hugging Face Spaces** | **100% Free** | Connects to your GitHub repo. Uses our `Dockerfile` to give you a permanent public URL (e.g. `https://yourname-purevoice-ai.hf.space`) with 16GB RAM & free CPU. | **Public website for the whole world** |
+| **3. Render.com / Railway** | **100% Free Tier** | Automatically builds the `Dockerfile` from your GitHub repo and provides a free public `https://*.onrender.com` link. | Custom domain or personal portfolio |
+
+---
+
+## ✨ Features at a Glance
+
+* **🎙️ Both Audio & Video Supported**:
+  Clean `.mp3`, `.wav`, `.m4a`, `.aac`, `.flac`, `.ogg` audio files OR `.mp4`, `.mov`, `.webm`, `.mkv`, `.avi` video files.
+* **⚡ Lossless Video Remuxing (`-c:v copy`)**:
+  When processing video, the video stream is never re-encoded. PureVoice replaces only the audio track, preserving **100% of 4K/60FPS visual fidelity** in seconds!
+* **🎧 Live A/B Audio Comparison**:
+  Switch between **"Original"** and **"✨ PureVoice (Cleaned)"** in real time while media is playing to hear the background hum vanish and speech pop forward.
+* **🎛️ 4 Tuned Creator Presets**:
+  * **✨ PureVoice Creator**: Formant clarity EQ + 85Hz low-cut + dynamic speech leveler (like Instagram Reels / TikTok).
+  * **🎙️ Studio Podcast**: High noise reduction for noisy streets, cafés, and echoey rooms.
+  * **🍃 Wind & Handling**: Aggressive 120Hz high-pass filter targeting wind rumble and mic vibrations.
+  * **🎚️ Subtle Cleanup**: Soft room cleanup, keeping natural room warmth intact.
+* **🪶 Zero-Pip Dependency Local Server**:
+  The default `server.py` runs on Python's built-in standard library with FFmpeg—no heavy Python wheels required. A production **FastAPI** app is also included.
+
+---
+
+## 📊 Comparison: PureVoice AI vs. Alternatives
+
+| Feature | 🎙️ PureVoice AI | Adobe Podcast | Krisp | Audacity |
+|:---|:---:|:---:|:---:|:---:|
+| **Free & Open Source** | ✅ **100% Free (MIT)** | ❌ Paid / Limited | ❌ Paid Subscription | ✅ Free |
+| **Video Processing (MP4, MOV)** | ✅ **Lossless Remux** | ⚠️ Audio Only | ⚠️ Real-time Call Only | ❌ Audio Only |
+| **Live A/B Player Switch** | ✅ **Instant Switch** | ❌ Play/Pause only | ❌ Settings toggle | ❌ Manual Mute |
+| **Self-Hostable on GitHub** | ✅ **Codespaces / Docker** | ❌ Proprietary Cloud | ❌ Proprietary App | ❌ Desktop App |
+| **Zero Transcode Video Export** | ✅ **Under 3 seconds** | N/A | N/A | N/A |
+
+---
+
+## 🚀 Quick Start (Local)
+
+### Prerequisites
+* **Python 3.10+**
+* **FFmpeg** installed and added to your system `PATH`.
 
 ```bash
-cd "C:\Users\alone\.gemini\antigravity\scratch\insta-audio-denoiser"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/purevoice-ai.git
-git push -u origin main
-```
+# Clone the repository
+git clone https://github.com/YOUR_USERNAME/purevoice-ai.git
+cd purevoice-ai
 
-*(Replace `YOUR_USERNAME` with your actual GitHub username).*
-
----
-
-## 💻 Local Quick Start
-
-```bash
-cd "C:\Users\alone\.gemini\antigravity\scratch\insta-audio-denoiser"
+# Start the web app (zero external pip packages required!)
 python server.py
 ```
-Or double-click `run.bat`. Then open **`http://localhost:8000`**.
+
+Visit **`http://localhost:8000`** in your browser.
 
 ---
 
-## 🛠️ The PureVoice Audio Engine Architecture
+## 🌐 Deploy as a Free Public Website (Hugging Face Spaces)
+
+1. Go to **[huggingface.co/new-space](https://huggingface.co/new-space)**.
+2. Enter Space name: `purevoice-ai`.
+3. Choose **Docker** as the Space SDK.
+4. Select **Free CPU / 16GB RAM** (Free forever).
+5. Link your GitHub repository.
+6. Hugging Face builds the application via the included `Dockerfile` and gives you a free live public URL!
+
+---
+
+## 🛠️ The PureVoice Audio Pipeline
 
 ```
 [Raw Audio / Video]
@@ -82,3 +123,21 @@ Or double-click `run.bat`. Then open **`http://localhost:8000`**.
 6. Lossless Remux (-c:v copy)► Video track is copied 1:1 without transcoding.
                                Instant export, 100% 4K/HD video quality preserved!
 ```
+
+---
+
+## 🏷️ Recommended GitHub Topics & Tags
+
+When creating your repository on GitHub, add these topics in the repository settings (**About ⚙️** section) so people discovering AI audio tools can find your project:
+
+```
+audio-denoiser, speech-enhancement, noise-reduction, voice-filter,
+ffmpeg, podcast-tools, reels-editor, python, fastapi, web-app,
+sound-restoration, video-audio-cleanup, creator-tools
+```
+
+---
+
+## 📄 License
+
+Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.

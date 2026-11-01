@@ -1,0 +1,107 @@
+<svg width="1000" height="640" viewBox="0 0 1000 640" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="windowBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#11131f" />
+      <stop offset="100%" stop-color="#0a0b12" />
+    </linearGradient>
+    <linearGradient id="cardBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#181a29" />
+      <stop offset="100%" stop-color="#121422" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1" />
+      <stop offset="50%" stop-color="#a855f7" />
+      <stop offset="100%" stop-color="#ec4899" />
+    </linearGradient>
+    <filter id="shadowFilter" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#000000" flood-opacity="0.6" />
+    </filter>
+  </defs>
+
+  <!-- Window Container -->
+  <rect x="20" y="20" width="960" height="600" rx="18" fill="url(#windowBg)" stroke="rgba(255, 255, 255, 0.1)" stroke-width="1.5" filter="url(#shadowFilter)" />
+
+  <!-- Window Top Bar -->
+  <rect x="20" y="20" width="960" height="42" rx="18" fill="#151724" />
+  <rect x="20" y="44" width="960" height="18" fill="#151724" />
+  <line x1="20" y1="62" x2="980" y2="62" stroke="rgba(255, 255, 255, 0.08)" />
+  <circle cx="46" cy="41" r="6" fill="#ef4444" opacity="0.8" />
+  <circle cx="66" cy="41" r="6" fill="#f59e0b" opacity="0.8" />
+  <circle cx="86" cy="41" r="6" fill="#10b981" opacity="0.8" />
+  <text x="500" y="45" fill="#9ca3af" font-family="-apple-system, sans-serif" font-size="12" font-weight="600" text-anchor="middle">PureVoice AI — Studio Noise Reducer</text>
+
+  <!-- App Header inside UI -->
+  <g transform="translate(0, 85)">
+    <circle cx="410" cy="10" r="4" fill="#a855f7" />
+    <text x="500" y="14" fill="#c084fc" font-family="-apple-system, sans-serif" font-size="11" font-weight="700" letter-spacing="1" text-anchor="middle">PUREVOICE STUDIO AI</text>
+    <text x="500" y="42" fill="#ffffff" font-family="-apple-system, sans-serif" font-size="24" font-weight="800" text-anchor="middle">
+      Crystal-Clear Audio with <tspan fill="url(#accentGrad)">PureVoice AI</tspan>
+    </text>
+    <text x="500" y="64" fill="#9ca3af" font-family="-apple-system, sans-serif" font-size="12" text-anchor="middle">
+      Eliminate background noise from video or audio with 1-click studio vocal enhancement.
+    </text>
+  </g>
+
+  <!-- Main Card Area -->
+  <g transform="translate(100, 180)">
+    <rect width="800" height="410" rx="14" fill="url(#cardBg)" stroke="rgba(255, 255, 255, 0.08)" />
+
+    <!-- A/B Comparison Toggle Box -->
+    <rect x="30" y="24" width="740" height="60" rx="12" fill="rgba(255, 255, 255, 0.03)" stroke="rgba(255, 255, 255, 0.07)" />
+    <text x="50" y="50" fill="#ffffff" font-family="-apple-system, sans-serif" font-size="14" font-weight="700">Listening to: <tspan fill="#a855f7">✨ PureVoice (Cleaned)</tspan></text>
+    <text x="50" y="68" fill="#9ca3af" font-family="-apple-system, sans-serif" font-size="11">Flip between Original and Cleaned in real time to hear the difference!</text>
+
+    <!-- Switch Button Group -->
+    <rect x="580" y="36" width="170" height="36" rx="8" fill="rgba(0,0,0,0.5)" />
+    <text x="622" y="59" fill="#9ca3af" font-family="-apple-system, sans-serif" font-size="12" font-weight="600" text-anchor="middle">Original</text>
+    <rect x="665" y="38" width="82" height="32" rx="6" fill="#a855f7" />
+    <text x="706" y="59" fill="#ffffff" font-family="-apple-system, sans-serif" font-size="12" font-weight="700" text-anchor="middle">✨ Cleaned</text>
+
+    <!-- Glowing Waveform Visualizer -->
+    <rect x="30" y="100" width="740" height="90" rx="10" fill="#000000" stroke="rgba(255, 255, 255, 0.08)" />
+    <!-- Dynamic sound bars -->
+    <g transform="translate(50, 110)">
+      <!-- Render 48 aesthetic animated bars -->
+      <path d="M10,40 v-15 M24,40 v-25 M38,40 v-32 M52,40 v-18 M66,40 v-40 M80,40 v-28 M94,40 v-14 M108,40 v-36 M122,40 v-48 M136,40 v-30 M150,40 v-15 M164,40 v-45 M178,40 v-55 M192,40 v-35 M206,40 v-20 M220,40 v-50 M234,40 v-65 M248,40 v-42 M262,40 v-22 M276,40 v-38 M290,40 v-58 M304,40 v-45 M318,40 v-25 M332,40 v-48 M346,40 v-60 M360,40 v-38 M374,40 v-18 M388,40 v-52 M402,40 v-62 M416,40 v-35 M430,40 v-20 M444,40 v-40 M458,40 v-55 M472,40 v-42 M486,40 v-18 M500,40 v-46 M514,40 v-58 M528,40 v-34 M542,40 v-15 M556,40 v-38 M570,40 v-52 M584,40 v-30 M598,40 v-16 M612,40 v-44 M626,40 v-56 M640,40 v-32 M654,40 v-18 M668,40 v-40 M682,40 v-25" stroke="url(#accentGrad)" stroke-width="4" stroke-linecap="round" />
+    </g>
+
+    <!-- Player Controls -->
+    <circle cx="62" cy="225" r="20" fill="url(#accentGrad)" />
+    <polygon points="59,217 69,225 59,233" fill="#ffffff" />
+    <!-- Progress Bar -->
+    <rect x="100" y="222" width="560" height="6" rx="3" fill="rgba(255, 255, 255, 0.15)" />
+    <rect x="100" y="222" width="280" height="6" rx="3" fill="#a855f7" />
+    <circle cx="380" cy="225" r="7" fill="#ffffff" />
+    <text x="735" y="229" fill="#9ca3af" font-family="-apple-system, sans-serif" font-size="12" text-anchor="end">01:14 / 02:30</text>
+
+    <!-- Preset Badges in UI -->
+    <g transform="translate(30, 265)">
+      <!-- Preset 1 (Active) -->
+      <rect x="0" y="0" width="170" height="52" rx="10" fill="rgba(168, 85, 247, 0.14)" stroke="#a855f7" />
+      <text x="14" y="22" fill="#ffffff" font-family="-apple-system, sans-serif" font-size="12" font-weight="700">✨ PureVoice Creator</text>
+      <text x="14" y="39" fill="#9ca3af" font-family="-apple-system, sans-serif" font-size="9.5">Clarity EQ + 85Hz cut</text>
+
+      <!-- Preset 2 -->
+      <rect x="185" y="0" width="170" height="52" rx="10" fill="rgba(255, 255, 255, 0.02)" stroke="rgba(255, 255, 255, 0.08)" />
+      <text x="199" y="22" fill="#ffffff" font-family="-apple-system, sans-serif" font-size="12" font-weight="700">🎙️ Studio Podcast</text>
+      <text x="199" y="39" fill="#9ca3af" font-family="-apple-system, sans-serif" font-size="9.5">Deep noise isolation</text>
+
+      <!-- Preset 3 -->
+      <rect x="370" y="0" width="170" height="52" rx="10" fill="rgba(255, 255, 255, 0.02)" stroke="rgba(255, 255, 255, 0.08)" />
+      <text x="384" y="22" fill="#ffffff" font-family="-apple-system, sans-serif" font-size="12" font-weight="700">🍃 Wind &amp; Handling</text>
+      <text x="384" y="39" fill="#9ca3af" font-family="-apple-system, sans-serif" font-size="9.5">High-pass 120Hz cut</text>
+
+      <!-- Preset 4 -->
+      <rect x="555" y="0" width="170" height="52" rx="10" fill="rgba(255, 255, 255, 0.02)" stroke="rgba(255, 255, 255, 0.08)" />
+      <text x="569" y="22" fill="#ffffff" font-family="-apple-system, sans-serif" font-size="12" font-weight="700">🎚️ Subtle Cleanup</text>
+      <text x="569" y="39" fill="#9ca3af" font-family="-apple-system, sans-serif" font-size="9.5">Keeps natural tone</text>
+    </g>
+
+    <!-- Download Action Button -->
+    <rect x="30" y="335" width="740" height="48" rx="12" fill="#10b981" />
+    <g transform="translate(340, 350)">
+      <path d="M12 4v10 M7 9l5 5 5-5 M4 17h16" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      <text x="32" y="14" fill="#ffffff" font-family="-apple-system, sans-serif" font-size="14" font-weight="700">Download Cleaned Studio Audio / Video</text>
+    </g>
+  </g>
+</svg>
