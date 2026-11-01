@@ -165,21 +165,27 @@ st.markdown(
     unsafe_allow_html=True
 )
 
+@st.cache_resource
+def get_denoiser():
+    return PureVoiceDenoiser()
+
+denoiser = get_denoiser()
+
+badge_text = "● PUREVOICE NEURAL AI (48kHz Studio Quality)" if denoiser.use_neural_ai else "● PUREVOICE STUDIO AI"
+
 # 3. Header Section
 st.markdown(
-    """
+    f"""
     <div class="hero-container">
-        <div class="badge-pill">● PUREVOICE STUDIO AI</div>
+        <div class="badge-pill">{badge_text}</div>
         <div class="main-title">Crystal-Clear Audio with <span class="gradient-text">PureVoice AI</span></div>
         <div class="subtitle">
-            Eliminate background fans, air conditioning hum, street chatter, and wind rumble with 1-click studio vocal enhancement.
+            Wipe out background fans, air conditioning hum, street chatter, and wind rumble with 1-click studio vocal enhancement.
         </div>
     </div>
     """,
     unsafe_allow_html=True
 )
-
-denoiser = PureVoiceDenoiser()
 
 # Preset configuration
 PRESET_MAP = {
