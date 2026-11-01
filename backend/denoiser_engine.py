@@ -17,13 +17,13 @@ from typing import Dict, Any, Optional
 AUDIO_EXTENSIONS = {'.mp3', '.wav', '.m4a', '.aac', '.flac', '.ogg', '.wma'}
 VIDEO_EXTENSIONS = {'.mp4', '.mov', '.avi', '.mkv', '.webm', '.m4v', '.3gp'}
 
-# Check if DeepFilterNet neural network is installed
+# Check if DeepFilterNet neural network is installed safely
 AI_MODEL_AVAILABLE = False
 try:
     from df.enhance import enhance, init_df, load_audio, save_audio
     import torch
     AI_MODEL_AVAILABLE = True
-except ImportError:
+except (ImportError, Exception, BaseException):
     AI_MODEL_AVAILABLE = False
 
 
@@ -47,30 +47,41 @@ class PureVoiceDenoiser:
             print("PureVoice AI: Running Studio DSP Mode (install deepfilternet for neural AI).")
 
     def _find_ffmpeg(self, custom_bin: Optional[str] = None) -> str:
-        if custom_bin:
+        if custom_bin and os.path.exists(custom_bin):
             return custom_bin
+        
+        # 1. System PATH
         which_path = shutil.which("ffmpeg")
         if which_path:
             return which_path
+
+        # 2. Standard Linux / Unix locations (apt packages.txt installs here)
+        for path in ["/usr/bin/ffmpeg", "/usr/local/bin/ffmpeg", "/opt/homebrew/bin/ffmpeg"]:
+            if os.path.exists(path):
+                return path
+
+        # 3. imageio-ffmpeg bundled binary
         try:
             import imageio_ffmpeg
             exe = imageio_ffmpeg.get_ffmpeg_exe()
             if exe and os.path.exists(exe):
+                try:
+                    os.chmod(exe, 0o755)
+                except Exception:
+                    pass
                 return exe
-        except ImportError:
+        except Exception:
             pass
-        for path in ["/usr/bin/ffmpeg", "/usr/local/bin/ffmpeg", "/opt/homebrew/bin/ffmpeg"]:
-            if os.path.exists(path):
-                return path
+
         return "ffmpeg"
 
-    def _verify_ffmpeg(self):
+    def _verify_ffmpeg(self) -> bool:
         try:
-            subprocess.run([self.ffmpeg, "-version"], capture_output=True, text=True, check=True)
+            res = subprocess.run([self.ffmpeg, "-version"], capture_output=True, text=True)
+            return (res.returncode == 0)
         except Exception as e:
-            raise RuntimeError(
-                f"FFmpeg not found at '{self.ffmpeg}'. Ensure 'imageio-ffmpeg' is installed or FFmpeg is in PATH."
-            ) from e
+            print(f"PureVoice AI: FFmpeg check warning: {e}")
+            return False
 
     def is_video(self, file_path: str) -> bool:
         ext = os.path.splitext(file_path)[1].lower()
@@ -392,12 +403,13 @@ class PureVoiceDenoiser:
 
 
 if __name__ == "__main__":
-    try:
-        import streamlit as st
-        root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    app_file = os.path.join(root_dir, "app.py")
+    if os.path.exists(app_file):
+        import runpy
         if root_dir not in sys.path:
             sys.path.insert(0, root_dir)
-        import app
-    except Exception:
+        runpy.run_path(app_file, run_name="__main__")
+    else:
         denoiser = PureVoiceDenoiser()
         print("PureVoice AI Engine initialized successfully.")
