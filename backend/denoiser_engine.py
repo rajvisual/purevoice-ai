@@ -22,15 +22,43 @@ AUDIO_EXTENSIONS = {'.mp3', '.wav', '.m4a', '.aac', '.flac', '.ogg', '.wma'}
 VIDEO_EXTENSIONS = {'.mp4', '.mov', '.avi', '.mkv', '.webm', '.m4v', '.3gp'}
 
 class PureVoiceDenoiser:
-    def __init__(self, ffmpeg_bin: str = "ffmpeg"):
-        self.ffmpeg = ffmpeg_bin
+    def __init__(self, ffmpeg_bin: Optional[str] = None):
+        self.ffmpeg = self._find_ffmpeg(ffmpeg_bin)
         self._verify_ffmpeg()
+
+    def _find_ffmpeg(self, custom_bin: Optional[str] = None) -> str:
+        # 1. Custom binary passed
+        if custom_bin:
+            return custom_bin
+        
+        # 2. Check system PATH
+        which_path = shutil.which("ffmpeg")
+        if which_path:
+            return which_path
+
+        # 3. Check imageio_ffmpeg (Python bundle that auto-provides static FFmpeg binary)
+        try:
+            import imageio_ffmpeg
+            exe = imageio_ffmpeg.get_ffmpeg_exe()
+            if exe and os.path.exists(exe):
+                return exe
+        except ImportError:
+            pass
+
+        # 4. Check standard Linux/Debian cloud paths
+        for path in ["/usr/bin/ffmpeg", "/usr/local/bin/ffmpeg", "/opt/homebrew/bin/ffmpeg"]:
+            if os.path.exists(path):
+                return path
+
+        return "ffmpeg"
 
     def _verify_ffmpeg(self):
         try:
             res = subprocess.run([self.ffmpeg, "-version"], capture_output=True, text=True, check=True)
         except Exception as e:
-            raise RuntimeError(f"FFmpeg not found at '{self.ffmpeg}'. Please install FFmpeg and add it to PATH.") from e
+            raise RuntimeError(
+                f"FFmpeg not found at '{self.ffmpeg}'. Ensure 'imageio-ffmpeg' is installed or FFmpeg is in PATH."
+            ) from e
 
     def is_video(self, file_path: str) -> bool:
         ext = os.path.splitext(file_path)[1].lower()
