@@ -80,7 +80,7 @@
     <rect x="20" y="38" width="370" height="52" rx="10" fill="#181a29" stroke="rgba(255, 255, 255, 0.08)" />
     <rect x="32" y="48" width="76" height="32" rx="6" fill="rgba(255, 255, 255, 0.08)" stroke="rgba(255, 255, 255, 0.12)" />
     <text x="70" y="68" fill="#ffffff" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="600" text-anchor="middle">⬆ Browse</text>
-    <text x="120" y="68" fill="#9ca3af" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" font-weight="400">200MB limit • MP4, MOV, MKV, WEBM</text>
+    <text x="120" y="68" fill="#9ca3af" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" font-weight="400">1GB file limit • MP4, MOV, MKV, WEBM</text>
 
     <!-- File Attached Preview Card -->
     <rect x="20" y="104" width="370" height="74" rx="10" fill="rgba(99, 102, 241, 0.08)" stroke="rgba(99, 102, 241, 0.25)" />

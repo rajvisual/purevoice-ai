@@ -45,6 +45,8 @@ Use the tool directly in your browser without installing anything:
   Instagram-style vocal enhancement that boosts 160Hz proximity warmth, brings 3.4kHz speech clarity forward, adds silky condenser air sheen, and levels words smoothly.
 * **⚡ Lossless Video Remuxing**:
   The video stream is never re-compressed. PureVoice replaces only the audio track, preserving **100% 4K/60FPS video quality** in seconds.
+* **📦 1GB Large File Support & Live Progress Bar**:
+  Upload files up to **1 GB** (4K podcasts, long interview footage, high-res audio) with a live percentage bar tracking upload buffering and processing stages.
 * **🎛️ 4 Tuned Presets**:
   * **✨ PureVoice Creator**: Balanced vocal clarity + proximity warmth + 65Hz low-cut.
   * **🎙️ Studio Podcast**: High noise reduction for noisy streets, cafés, and echoey rooms.

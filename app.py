@@ -6,6 +6,7 @@ Creator-Grade Audio Controls (Smart Auto-Detect + Manual Studio Sliders).
 
 import os
 import sys
+import time
 import tempfile
 import streamlit as st
 
@@ -13,6 +14,37 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(BASE_DIR, "backend"))
 
 from denoiser_engine import PureVoiceDenoiser
+
+def save_uploaded_file_with_progress(uploaded_file, progress_bar, status_text):
+    """Saves uploaded file to temp directory while updating live percentage bar."""
+    total_size = getattr(uploaded_file, "size", 0)
+    chunk_size = 4 * 1024 * 1024  # 4MB chunks
+    bytes_written = 0
+
+    suffix = f"_{uploaded_file.name}"
+    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=suffix)
+    
+    uploaded_file.seek(0)
+
+    if total_size and total_size > 0:
+        total_mb = max(1.0, round(total_size / (1024 * 1024), 1))
+        while True:
+            chunk = uploaded_file.read(chunk_size)
+            if not chunk:
+                break
+            tmp.write(chunk)
+            bytes_written += len(chunk)
+            pct = min(35, int((bytes_written / total_size) * 35))
+            written_mb = round(bytes_written / (1024 * 1024), 1)
+            progress_bar.progress(pct)
+            status_text.markdown(f"📥 **Buffering Media File**: `{written_mb} MB / {total_mb} MB` ({pct}%)")
+    else:
+        tmp.write(uploaded_file.read())
+        progress_bar.progress(35)
+        status_text.markdown("📥 **Media Loaded**: 35%")
+
+    tmp.close()
+    return tmp.name
 
 # 1. Page Configuration
 st.set_page_config(
@@ -191,10 +223,11 @@ with tab_video:
     with col_upload:
         st.markdown("#### 1. Upload Video File")
         video_file = st.file_uploader(
-            "Upload MP4, MOV, MKV, WEBM",
+            "Upload MP4, MOV, MKV, WEBM (Max 1GB)",
             type=["mp4", "mov", "mkv", "webm", "avi"],
             label_visibility="collapsed",
-            key="video_upload_box"
+            key="video_upload_box",
+            help="Upload video up to 1GB. Lossless remuxing preserves 100% 4K/60FPS video quality."
         )
         if video_file:
             st.video(video_file)
@@ -261,46 +294,67 @@ with tab_video:
 
         if video_file is not None:
             if st.button("✨ Clean & Enhance Video", key="btn_run_video"):
-                with st.spinner("Analyzing acoustics and processing video..."):
-                    with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{video_file.name}") as tmp_in:
-                        tmp_in.write(video_file.read())
-                        input_path = tmp_in.name
+                progress_bar = st.progress(0)
+                status_text = st.empty()
 
-                    # Run Smart Auto-Detection if enabled
-                    if is_auto_video:
-                        analysis = denoiser.analyze_audio(input_path)
-                        reduction_depth = analysis["auto_nr_db"]
-                        voice_strength = analysis["auto_voice_percent"]
-                        enhance_voice_toggle = True
-                        st.info(f"🎯 **AI Auto-Tuned**: {analysis['acoustic_condition']} • Applied {reduction_depth} dB Noise Cut & {voice_strength}% Vocal Polish")
+                # Step 1: Uploading / buffering to disk (0% - 35%)
+                input_path = save_uploaded_file_with_progress(video_file, progress_bar, status_text)
 
-                    output_dir = os.path.join(BASE_DIR, "outputs")
-                    res = denoiser.process_file(
-                        input_path=input_path,
-                        output_dir=output_dir,
-                        preset=chosen_preset,
-                        reduction_level=reduction_depth,
-                        enhance_voice=enhance_voice_toggle,
-                        voice_enhancement_level=voice_strength
+                # Step 2: Acoustic dynamic scanning (35% - 55%)
+                auto_badge_info = None
+                if is_auto_video:
+                    progress_bar.progress(45)
+                    status_text.markdown("🔬 **Analyzing Acoustics**: Scanning dynamic range & noise floor (45%)...")
+                    analysis = denoiser.analyze_audio(input_path)
+                    reduction_depth = analysis["auto_nr_db"]
+                    voice_strength = analysis["auto_voice_percent"]
+                    enhance_voice_toggle = True
+                    auto_badge_info = f"🎯 **AI Auto-Tuned**: {analysis['acoustic_condition']} • Applied {reduction_depth} dB Noise Cut & {voice_strength}% Vocal Polish"
+                else:
+                    progress_bar.progress(50)
+                    status_text.markdown("🎛️ **Configuring Studio Filters**: Applying selected manual controls (50%)...")
+
+                # Step 3: Studio Noise Reduction & Vocal Mastering (55% - 85%)
+                progress_bar.progress(65)
+                status_text.markdown("🎙️ **Mastering Audio**: Removing noise & adding vocal clarity (65%)...")
+                output_dir = os.path.join(BASE_DIR, "outputs")
+                res = denoiser.process_file(
+                    input_path=input_path,
+                    output_dir=output_dir,
+                    preset=chosen_preset,
+                    reduction_level=reduction_depth,
+                    enhance_voice=enhance_voice_toggle,
+                    voice_enhancement_level=voice_strength
+                )
+
+                # Step 4: Lossless 4K Video Remuxing (85% - 100%)
+                progress_bar.progress(90)
+                status_text.markdown("⚡ **Lossless Remuxing**: Preserving 100% 4K/60FPS video stream (90%)...")
+                time.sleep(0.3)
+
+                progress_bar.progress(100)
+                status_text.markdown("✅ **Processing Complete!** (100%)")
+
+                if auto_badge_info:
+                    st.info(auto_badge_info)
+
+                st.success("🎉 Video successfully cleaned and enhanced!")
+                st.markdown("#### ✨ Enhanced Studio Video Result:")
+                st.video(res["output_path"])
+
+                with open(res["output_path"], "rb") as f:
+                    st.download_button(
+                        label="⬇️ Download Enhanced Video (MP4)",
+                        data=f,
+                        file_name=res["output_file"],
+                        mime="video/mp4",
+                        key="dl_video"
                     )
 
-                    st.success("🎉 Video successfully cleaned and enhanced!")
-                    st.markdown("#### ✨ Enhanced Studio Video Result:")
-                    st.video(res["output_path"])
-
-                    with open(res["output_path"], "rb") as f:
-                        st.download_button(
-                            label="⬇️ Download Enhanced Video (MP4)",
-                            data=f,
-                            file_name=res["output_file"],
-                            mime="video/mp4",
-                            key="dl_video"
-                        )
-
-                    try:
-                        os.remove(input_path)
-                    except Exception:
-                        pass
+                try:
+                    os.remove(input_path)
+                except Exception:
+                    pass
 
 # --- TAB 2: AUDIO ---
 with tab_audio:
@@ -309,10 +363,11 @@ with tab_audio:
     with col_audio_up:
         st.markdown("#### 1. Upload Audio File")
         audio_file = st.file_uploader(
-            "Upload MP3, WAV, M4A, AAC, FLAC",
+            "Upload MP3, WAV, M4A, AAC, FLAC (Max 1GB)",
             type=["mp3", "wav", "m4a", "aac", "flac", "ogg"],
             label_visibility="collapsed",
-            key="audio_upload_box"
+            key="audio_upload_box",
+            help="Upload audio files up to 1GB."
         )
         if audio_file:
             st.markdown("**Original Audio:**")
@@ -378,43 +433,64 @@ with tab_audio:
 
         if audio_file is not None:
             if st.button("✨ Clean & Enhance Audio", key="btn_run_audio"):
-                with st.spinner("Analyzing acoustics and processing audio..."):
-                    with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{audio_file.name}") as tmp_in:
-                        tmp_in.write(audio_file.read())
-                        input_path = tmp_in.name
+                progress_bar = st.progress(0)
+                status_text = st.empty()
 
-                    # Run Smart Auto-Detection if enabled
-                    if is_auto_audio:
-                        analysis = denoiser.analyze_audio(input_path)
-                        reduction_audio_depth = analysis["auto_nr_db"]
-                        voice_audio_strength = analysis["auto_voice_percent"]
-                        enhance_audio_toggle = True
-                        st.info(f"🎯 **AI Auto-Tuned**: {analysis['acoustic_condition']} • Applied {reduction_audio_depth} dB Noise Cut & {voice_audio_strength}% Vocal Polish")
+                # Step 1: Uploading / buffering to disk (0% - 35%)
+                input_path = save_uploaded_file_with_progress(audio_file, progress_bar, status_text)
 
-                    output_dir = os.path.join(BASE_DIR, "outputs")
-                    res = denoiser.process_file(
-                        input_path=input_path,
-                        output_dir=output_dir,
-                        preset=chosen_audio_preset,
-                        reduction_level=reduction_audio_depth,
-                        enhance_voice=enhance_audio_toggle,
-                        voice_enhancement_level=voice_audio_strength
+                # Step 2: Acoustic dynamic scanning (35% - 55%)
+                auto_audio_badge_info = None
+                if is_auto_audio:
+                    progress_bar.progress(45)
+                    status_text.markdown("🔬 **Analyzing Acoustics**: Scanning dynamic range & noise floor (45%)...")
+                    analysis = denoiser.analyze_audio(input_path)
+                    reduction_audio_depth = analysis["auto_nr_db"]
+                    voice_audio_strength = analysis["auto_voice_percent"]
+                    enhance_audio_toggle = True
+                    auto_audio_badge_info = f"🎯 **AI Auto-Tuned**: {analysis['acoustic_condition']} • Applied {reduction_audio_depth} dB Noise Cut & {voice_audio_strength}% Vocal Polish"
+                else:
+                    progress_bar.progress(50)
+                    status_text.markdown("🎛️ **Configuring Studio Filters**: Applying selected manual controls (50%)...")
+
+                # Step 3: Studio Noise Reduction & Vocal Mastering (55% - 90%)
+                progress_bar.progress(70)
+                status_text.markdown("🎙️ **Mastering Audio**: Removing noise & polishing vocal tone (70%)...")
+                output_dir = os.path.join(BASE_DIR, "outputs")
+                res = denoiser.process_file(
+                    input_path=input_path,
+                    output_dir=output_dir,
+                    preset=chosen_audio_preset,
+                    reduction_level=reduction_audio_depth,
+                    enhance_voice=enhance_audio_toggle,
+                    voice_enhancement_level=voice_audio_strength
+                )
+
+                # Step 4: Finalizing Audio Export (90% - 100%)
+                progress_bar.progress(95)
+                status_text.markdown("🎵 **Finalizing Audio Export**: Encoding pristine MP3 (95%)...")
+                time.sleep(0.3)
+
+                progress_bar.progress(100)
+                status_text.markdown("✅ **Processing Complete!** (100%)")
+
+                if auto_audio_badge_info:
+                    st.info(auto_audio_badge_info)
+
+                st.success("🎉 Audio successfully cleaned and enhanced!")
+                st.markdown("#### ✨ Enhanced Studio Audio Result:")
+                st.audio(res["output_path"])
+
+                with open(res["output_path"], "rb") as f:
+                    st.download_button(
+                        label="⬇️ Download Enhanced Audio (MP3)",
+                        data=f,
+                        file_name=res["output_file"],
+                        mime="audio/mpeg",
+                        key="dl_audio"
                     )
 
-                    st.success("🎉 Audio successfully cleaned and enhanced!")
-                    st.markdown("#### ✨ Enhanced Studio Audio Result:")
-                    st.audio(res["output_path"])
-
-                    with open(res["output_path"], "rb") as f:
-                        st.download_button(
-                            label="⬇️ Download Enhanced Audio (MP3)",
-                            data=f,
-                            file_name=res["output_file"],
-                            mime="audio/mpeg",
-                            key="dl_audio"
-                        )
-
-                    try:
-                        os.remove(input_path)
-                    except Exception:
-                        pass
+                try:
+                    os.remove(input_path)
+                except Exception:
+                    pass
