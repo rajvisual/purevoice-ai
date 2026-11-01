@@ -21,7 +21,7 @@
 
   <br/>
 
-  <img src="assets/preview.svg" alt="PureVoice AI Interface" width="96%" />
+  <img src="assets/purevoice-ui-preview.svg" alt="PureVoice AI Interface" width="96%" />
 
 </div>
 
@@ -78,16 +78,6 @@ Use the tool directly in your browser without installing anything:
         ▼
 5. Lossless Remux (-c:v copy)► Video stream copied 1:1 without transcoding.
                                Instant export, 100% 4K/60FPS video quality preserved!
-```
-
----
-
-## 🏷️ Repository Tags & Topics
-
-```text
-audio-denoiser, speech-enhancement, noise-reduction, voice-filter,
-ffmpeg, podcast-tools, sound-restoration, video-audio-cleanup,
-streamlit, creator-tools, python, audio-processing
 ```
 
 ---
