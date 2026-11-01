@@ -64,16 +64,16 @@ class PureVoiceDenoiser:
         ext = os.path.splitext(file_path)[1].lower()
         return ext in VIDEO_EXTENSIONS
 
-    def get_filter_chain(self, preset: str = "instagram", custom_nr: int = 18) -> str:
+    def get_filter_chain(self, preset: str = "creator", custom_nr: int = 18) -> str:
         """
         Builds the FFmpeg audio filtergraph corresponding to the chosen preset.
         Presets:
-        - 'instagram': PureVoice Creator signature sound (noise cut + vocal clarity boost + auto-leveling)
+        - 'creator': PureVoice Creator signature sound (noise cut + vocal clarity boost + auto-leveling)
         - 'studio': High noise reduction for noisy/traffic/crowded environments
         - 'subtle': Gentle noise reduction preserving natural room tone
         - 'wind_rumble': Special focus on wind, HVAC, and mic handling thumps
         """
-        if preset == "instagram":
+        if preset in ("creator", "instagram"):
             return (
                 f"highpass=f=85,"
                 f"adeclick,"
@@ -108,7 +108,7 @@ class PureVoiceDenoiser:
         self,
         input_path: str,
         output_dir: str,
-        preset: str = "instagram",
+        preset: str = "creator",
         reduction_level: int = 18
     ) -> Dict[str, Any]:
         """

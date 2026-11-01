@@ -170,9 +170,9 @@ st.markdown(
     """
     <div class="hero-container">
         <div class="badge-pill">● PUREVOICE STUDIO AI</div>
-        <div class="main-title">Clean Noise Like <span class="gradient-text">Instagram Edit</span></div>
+        <div class="main-title">Crystal-Clear Audio with <span class="gradient-text">PureVoice AI</span></div>
         <div class="subtitle">
-            Wipe out background fans, air conditioning hum, street chatter, and wind rumble with 1-click studio vocal enhancement.
+            Eliminate background fans, air conditioning hum, street chatter, and wind rumble with 1-click studio vocal enhancement.
         </div>
     </div>
     """,
@@ -183,7 +183,7 @@ denoiser = PureVoiceDenoiser()
 
 # Preset configuration
 PRESET_MAP = {
-    "✨ PureVoice Creator (Vocal Boost + 85Hz Low-Cut)": "instagram",
+    "✨ PureVoice Creator (Vocal Boost + 85Hz Low-Cut)": "creator",
     "🎙️ Studio Podcast (Deep Noise Suppression)": "studio",
     "🍃 Wind & Mic Handling (120Hz Rumble Cut)": "wind_rumble",
     "🎚️ Subtle Cleanup (Preserves Natural Ambience)": "subtle"
