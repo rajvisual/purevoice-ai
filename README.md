@@ -37,14 +37,16 @@ Use the tool directly in your browser without installing anything:
 
 ## ✨ Features
 
-* **🎙️ Audio & Video Noise Reduction**:
-  Clean `.mp3`, `.wav`, `.m4a`, `.aac`, `.flac`, `.ogg` audio files OR `.mp4`, `.mov`, `.webm`, `.mkv`, `.avi` video files.
+* **🔇 Reduce Noise (AI Deep Neural Network + Studio DSP)**:
+  Wipes away background air conditioning hum, PC fans, street traffic, and wind rumble from any audio or video file.
+* **✨ Enhance Voice (Studio Microphone Polish)**:
+  Instagram-style vocal enhancement that boosts 160Hz proximity warmth, brings 3.4kHz speech clarity forward, adds silky condenser air sheen, and levels words smoothly.
 * **⚡ Lossless Video Remuxing**:
   The video stream is never re-compressed. PureVoice replaces only the audio track, preserving **100% 4K/60FPS video quality** in seconds.
 * **🎛️ 4 Tuned Presets**:
-  * **✨ PureVoice Creator**: Formant clarity EQ + 85Hz low-cut + dynamic speech leveler for crisp vocal punch.
+  * **✨ PureVoice Creator**: Balanced vocal clarity + proximity warmth + 65Hz low-cut.
   * **🎙️ Studio Podcast**: High noise reduction for noisy streets, cafés, and echoey rooms.
-  * **🍃 Wind & Mic Handling**: Aggressive 120Hz high-pass filter targeting wind rumble and mic vibrations.
+  * **🍃 Wind & Mic Handling**: Aggressive 95Hz high-pass filter targeting wind rumble and mic vibrations.
   * **🎚️ Subtle Cleanup**: Soft room cleanup, keeping natural room warmth intact.
 * **⬇️ One-Click Studio Export**:
   Direct high-quality download of cleaned MP4 video and MP3 audio.

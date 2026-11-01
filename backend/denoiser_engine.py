@@ -1,8 +1,10 @@
 """
-PureVoice AI - Neural Audio & Video Noise Reducer
-=================================================
-Powered by DeepFilterNet 3: 48kHz Full-Band Deep Neural Network
-(Same architecture family as Meta AI Demucs & Adobe Podcast Enhance)
+PureVoice AI - Neural Audio & Video Noise Reducer + Voice Enhancer
+==================================================================
+Features:
+1. DeepFilterNet 3 (48kHz Full-Band Deep Neural Network)
+2. Instagram-Style 'Enhance Voice' Vocal Mastering Engine (Warmth, Clarity, Sheen & Leveler)
+3. Zero-loss Video Remuxing (-c:v copy)
 """
 
 import os
@@ -33,7 +35,6 @@ class PureVoiceDenoiser:
         self.df_state = None
         self.use_neural_ai = False
 
-        # Initialize DeepFilterNet AI if installed
         if AI_MODEL_AVAILABLE:
             try:
                 self.ai_model, self.df_state, _ = init_df()
@@ -119,16 +120,42 @@ class PureVoiceDenoiser:
                 f"speechnorm=p=0.95:e=1.2:c=1.2"
             )
 
+    def _get_voice_enhancer_filter(self, intensity: int = 75) -> str:
+        """
+        Instagram-Style 'Enhance Voice' Mastering Chain:
+        1. 160Hz Proximity Warmth (Adds rich chest resonance like a studio mic)
+        2. 380Hz De-box (Cleans hollow room echo & boxy reflections)
+        3. 3.4kHz Presence Boost (Brings voice upfront so consonants cut through clearly)
+        4. 10kHz Condenser Air (Silky studio sheen on vocals)
+        5. Speech Normalizer (Dynamic broadcast leveling)
+        """
+        factor = max(0.1, min(int(intensity), 100)) / 100.0
+        warmth_gain = round(2.6 * factor, 1)
+        clarity_gain = round(3.4 * factor, 1)
+        air_gain = round(2.4 * factor, 1)
+
+        return (
+            f"equalizer=f=160:t=q:w=1.2:g={warmth_gain},"
+            f"equalizer=f=380:t=q:w=1.0:g=-1.6,"
+            f"equalizer=f=3400:t=q:w=1.2:g={clarity_gain},"
+            f"treble=g={air_gain}:f=9500,"
+            f"speechnorm=p=0.95:e=1.6:c=1.6"
+        )
+
     def process_file(
         self,
         input_path: str,
         output_dir: str,
         preset: str = "creator",
-        reduction_level: int = 12
+        reduction_level: int = 12,
+        enhance_voice: bool = True,
+        voice_enhancement_level: int = 75
     ) -> Dict[str, Any]:
         """
         Processes audio or video.
-        Uses Deep Neural Network AI when available for pristine studio speech.
+        Supports:
+        - Reduce Noise (via DeepFilterNet AI or tuned DSP)
+        - Enhance Voice (Instagram-style studio vocal polish)
         """
         os.makedirs(output_dir, exist_ok=True)
         filename = os.path.basename(input_path)
@@ -156,36 +183,45 @@ class PureVoiceDenoiser:
                 temp_wav
             ], capture_output=True, check=True)
 
-            # Step 2: Convert original audio for web player comparison
+            # Step 2: Convert original audio for comparison
             subprocess.run([
                 self.ffmpeg, "-y", "-i", temp_wav,
                 "-c:a", "libmp3lame", "-b:a", "192k",
                 orig_audio_path
             ], capture_output=True, check=True)
 
-            # Step 3: Run AI Neural Enhancement
-            temp_ai_wav = os.path.join(output_dir, f"temp_ai_{unique_id}.wav")
-            if self.use_neural_ai and self._run_ai_enhancement(temp_wav, temp_ai_wav):
+            # Step 3: Noise Reduction (AI Neural Net or DSP)
+            temp_denoised_wav = os.path.join(output_dir, f"temp_dn_{unique_id}.wav")
+            if self.use_neural_ai and self._run_ai_enhancement(temp_wav, temp_denoised_wav):
                 is_ai_used = True
-                # Cleaned WAV from AI to MP3
-                subprocess.run([
-                    self.ffmpeg, "-y", "-i", temp_ai_wav,
-                    "-c:a", "libmp3lame", "-b:a", "256k",
-                    denoised_audio_path
-                ], capture_output=True, check=True)
-                audio_for_remux = temp_ai_wav
             else:
-                # Fallback to studio DSP filter
-                filter_str = self._get_dsp_filter_chain(preset=preset, custom_nr=reduction_level)
+                dsp_filter = self._get_dsp_filter_chain(preset=preset, custom_nr=reduction_level)
                 subprocess.run([
                     self.ffmpeg, "-y", "-i", temp_wav,
-                    "-af", filter_str,
-                    "-c:a", "libmp3lame", "-b:a", "256k",
-                    denoised_audio_path
+                    "-af", dsp_filter,
+                    temp_denoised_wav
                 ], capture_output=True, check=True)
-                audio_for_remux = denoised_audio_path
 
-            # Step 4: Lossless Remux (-c:v copy preserves 100% video resolution and quality)
+            # Step 4: Instagram-Style "Enhance Voice" Mastering Pass
+            audio_for_remux = temp_denoised_wav
+            if enhance_voice and voice_enhancement_level > 0:
+                temp_enhanced_wav = os.path.join(output_dir, f"temp_enh_{unique_id}.wav")
+                voice_filter = self._get_voice_enhancer_filter(intensity=voice_enhancement_level)
+                subprocess.run([
+                    self.ffmpeg, "-y", "-i", temp_denoised_wav,
+                    "-af", voice_filter,
+                    temp_enhanced_wav
+                ], capture_output=True, check=True)
+                audio_for_remux = temp_enhanced_wav
+
+            # Export final audio as MP3 for player preview
+            subprocess.run([
+                self.ffmpeg, "-y", "-i", audio_for_remux,
+                "-c:a", "libmp3lame", "-b:a", "256k",
+                denoised_audio_path
+            ], capture_output=True, check=True)
+
+            # Step 5: Lossless Remux (-c:v copy preserves 100% video quality in seconds!)
             subprocess.run([
                 self.ffmpeg, "-y",
                 "-i", input_path,
@@ -198,8 +234,8 @@ class PureVoiceDenoiser:
                 denoised_video_path
             ], capture_output=True, check=True)
 
-            # Cleanup temp working files
-            for p in [temp_wav, temp_ai_wav]:
+            # Clean temporary intermediate files
+            for p in [temp_wav, temp_denoised_wav, os.path.join(output_dir, f"temp_enh_{unique_id}.wav")]:
                 if os.path.exists(p):
                     try:
                         os.remove(p)
@@ -210,6 +246,7 @@ class PureVoiceDenoiser:
                 "success": True,
                 "is_video": True,
                 "is_ai_used": is_ai_used,
+                "enhanced_voice": enhance_voice,
                 "preset": preset,
                 "reduction_level": reduction_level,
                 "output_file": denoised_video_filename,
@@ -220,7 +257,7 @@ class PureVoiceDenoiser:
             }
 
         else:
-            # Audio file processing
+            # Audio processing
             output_audio_filename = f"{base_name}_purevoice_clean_{unique_id}.mp3"
             output_audio_path = os.path.join(output_dir, output_audio_filename)
 
@@ -240,24 +277,36 @@ class PureVoiceDenoiser:
                 orig_audio_path
             ], capture_output=True, check=True)
 
-            temp_ai_wav = os.path.join(output_dir, f"temp_ai_{unique_id}.wav")
-            if self.use_neural_ai and self._run_ai_enhancement(temp_wav, temp_ai_wav):
+            temp_denoised_wav = os.path.join(output_dir, f"temp_dn_{unique_id}.wav")
+            if self.use_neural_ai and self._run_ai_enhancement(temp_wav, temp_denoised_wav):
                 is_ai_used = True
-                subprocess.run([
-                    self.ffmpeg, "-y", "-i", temp_ai_wav,
-                    "-c:a", "libmp3lame", "-b:a", "256k",
-                    output_audio_path
-                ], capture_output=True, check=True)
             else:
-                filter_str = self._get_dsp_filter_chain(preset=preset, custom_nr=reduction_level)
+                dsp_filter = self._get_dsp_filter_chain(preset=preset, custom_nr=reduction_level)
                 subprocess.run([
                     self.ffmpeg, "-y", "-i", temp_wav,
-                    "-af", filter_str,
-                    "-c:a", "libmp3lame", "-b:a", "256k",
-                    output_audio_path
+                    "-af", dsp_filter,
+                    temp_denoised_wav
                 ], capture_output=True, check=True)
 
-            for p in [temp_wav, temp_ai_wav]:
+            # Apply "Enhance Voice" if enabled
+            final_source = temp_denoised_wav
+            if enhance_voice and voice_enhancement_level > 0:
+                temp_enhanced_wav = os.path.join(output_dir, f"temp_enh_{unique_id}.wav")
+                voice_filter = self._get_voice_enhancer_filter(intensity=voice_enhancement_level)
+                subprocess.run([
+                    self.ffmpeg, "-y", "-i", temp_denoised_wav,
+                    "-af", voice_filter,
+                    temp_enhanced_wav
+                ], capture_output=True, check=True)
+                final_source = temp_enhanced_wav
+
+            subprocess.run([
+                self.ffmpeg, "-y", "-i", final_source,
+                "-c:a", "libmp3lame", "-b:a", "256k",
+                output_audio_path
+            ], capture_output=True, check=True)
+
+            for p in [temp_wav, temp_denoised_wav, os.path.join(output_dir, f"temp_enh_{unique_id}.wav")]:
                 if os.path.exists(p):
                     try:
                         os.remove(p)
@@ -268,6 +317,7 @@ class PureVoiceDenoiser:
                 "success": True,
                 "is_video": False,
                 "is_ai_used": is_ai_used,
+                "enhanced_voice": enhance_voice,
                 "preset": preset,
                 "reduction_level": reduction_level,
                 "output_file": output_audio_filename,

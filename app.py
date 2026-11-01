@@ -1,7 +1,7 @@
 """
-PureVoice AI - Studio Audio & Video Noise Reducer
-=================================================
-Modern Instagram/Creator-Grade UI built for Streamlit Cloud.
+PureVoice AI - Studio Audio & Video Noise Reducer + Voice Enhancer
+==================================================================
+Creator-Grade Audio Controls (Reduce Noise + Enhance Voice).
 """
 
 import os
@@ -16,13 +16,13 @@ from denoiser_engine import PureVoiceDenoiser
 
 # 1. Page Configuration
 st.set_page_config(
-    page_title="PureVoice AI - Studio Audio & Video Noise Reducer",
+    page_title="PureVoice AI - Noise Reducer & Voice Enhancer",
     page_icon="🎙️",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# 2. Ultra-Modern Instagram Creator CSS
+# 2. Modern Instagram / Creator UI Theme
 st.markdown(
     """
     <style>
@@ -45,7 +45,7 @@ st.markdown(
     /* Hero Header */
     .hero-container {
         text-align: center;
-        padding: 30px 10px 20px;
+        padding: 24px 10px 18px;
         max-width: 800px;
         margin: 0 auto;
     }
@@ -59,14 +59,14 @@ st.markdown(
         background: rgba(168, 85, 247, 0.12);
         border: 1px solid rgba(168, 85, 247, 0.35);
         color: #c084fc;
-        margin-bottom: 14px;
+        margin-bottom: 12px;
     }
     .main-title {
-        font-size: 3rem;
+        font-size: 2.8rem;
         font-weight: 900;
         letter-spacing: -0.04em;
         line-height: 1.15;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
     }
     .gradient-text {
         background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
@@ -75,10 +75,10 @@ st.markdown(
     }
     .subtitle {
         color: #9ca3af;
-        font-size: 1.1rem;
+        font-size: 1.05rem;
         line-height: 1.5;
         max-width: 620px;
-        margin: 0 auto 25px;
+        margin: 0 auto 20px;
     }
 
     /* Modern Tabs */
@@ -103,16 +103,6 @@ st.markdown(
         border-color: #a855f7 !important;
         color: #ffffff !important;
         box-shadow: 0 0 15px rgba(168, 85, 247, 0.3);
-    }
-
-    /* Cards */
-    .glass-card {
-        background: rgba(22, 24, 34, 0.75);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 18px;
-        padding: 24px;
-        backdrop-filter: blur(20px);
-        margin-bottom: 20px;
     }
 
     /* Primary Gradient Button */
@@ -150,15 +140,12 @@ st.markdown(
         transform: translateY(-2px) !important;
     }
 
-    /* File uploader styling */
+    /* File uploader box */
     [data-testid="stFileUploader"] {
         border: 2px dashed rgba(255, 255, 255, 0.12);
         border-radius: 16px;
         padding: 20px;
         background: rgba(255, 255, 255, 0.02);
-    }
-    [data-testid="stFileUploader"]:hover {
-        border-color: #a855f7;
     }
     </style>
     """,
@@ -180,27 +167,26 @@ st.markdown(
         <div class="badge-pill">{badge_text}</div>
         <div class="main-title">Crystal-Clear Audio with <span class="gradient-text">PureVoice AI</span></div>
         <div class="subtitle">
-            Wipe out background fans, air conditioning hum, street chatter, and wind rumble with 1-click studio vocal enhancement.
+            Reduce background noise and enhance human speech with studio microphone clarity.
         </div>
     </div>
     """,
     unsafe_allow_html=True
 )
 
-# Preset configuration
 PRESET_MAP = {
-    "✨ PureVoice Creator (Vocal Boost + 85Hz Low-Cut)": "creator",
-    "🎙️ Studio Podcast (Deep Noise Suppression)": "studio",
-    "🍃 Wind & Mic Handling (120Hz Rumble Cut)": "wind_rumble",
+    "✨ PureVoice Creator (Balanced Vocal + 65Hz Cut)": "creator",
+    "🎙️ Studio Podcast (Deep Noise Isolation)": "studio",
+    "🍃 Wind & Mic Handling (95Hz Rumble Cut)": "wind_rumble",
     "🎚️ Subtle Cleanup (Preserves Natural Ambience)": "subtle"
 }
 
-# 4. Main Interface
-tab_video, tab_audio = st.tabs(["🎬 Video Noise Reducer", "🎧 Audio Noise Reducer"])
+# 4. Tabs
+tab_video, tab_audio = st.tabs(["🎬 Video Noise Reducer & Voice Enhancer", "🎧 Audio Noise Reducer & Voice Enhancer"])
 
 # --- TAB 1: VIDEO ---
 with tab_video:
-    col_upload, col_settings = st.columns([1.2, 0.8], gap="large")
+    col_upload, col_settings = st.columns([1.1, 0.9], gap="large")
 
     with col_upload:
         st.markdown("#### 1. Upload Video File")
@@ -214,29 +200,53 @@ with tab_video:
             st.video(video_file)
 
     with col_settings:
-        st.markdown("#### 2. Tuning Presets")
-        chosen_preset_label = st.selectbox(
-            "Vocal Enhancement Preset",
-            list(PRESET_MAP.keys()),
-            index=0,
-            key="video_preset"
-        )
-        chosen_preset = PRESET_MAP[chosen_preset_label]
+        st.markdown("#### 2. Creator Audio Controls")
 
+        # Feature 1: Reduce Noise
+        st.markdown("**🔇 Reduce Noise**")
         reduction_depth = st.slider(
             "Noise Suppression Depth (dB)",
             min_value=6,
             max_value=24,
             value=12,
             step=1,
-            key="video_slider"
+            key="video_slider",
+            help="Higher values remove louder noise. 12 dB is ideal for natural voice."
         )
 
-        st.caption("⚡ **Lossless Remuxing**: Your video is never re-compressed. Only audio is cleaned, preserving 100% 4K/60FPS video quality in seconds.")
+        # Feature 2: Enhance Voice (Exact Instagram Edit feature!)
+        st.markdown("**✨ Enhance Voice**")
+        enhance_voice_toggle = st.toggle(
+            "Enable Studio Voice Polish",
+            value=True,
+            key="video_enhance_toggle",
+            help="Boosts proximity warmth, 3.4kHz vocal presence, condenser air sheen, and levels speech."
+        )
+
+        voice_strength = 80
+        if enhance_voice_toggle:
+            voice_strength = st.slider(
+                "Voice Enhancement Intensity (%)",
+                min_value=10,
+                max_value=100,
+                value=80,
+                step=5,
+                key="video_voice_slider"
+            )
+
+        chosen_preset_label = st.selectbox(
+            "Vocal Tone Profile",
+            list(PRESET_MAP.keys()),
+            index=0,
+            key="video_preset"
+        )
+        chosen_preset = PRESET_MAP[chosen_preset_label]
+
+        st.caption("⚡ **Lossless Remuxing**: Your video stream is never re-compressed. Only audio is enhanced, preserving 100% 4K/60FPS video quality.")
 
         if video_file is not None:
-            if st.button("✨ Clean Video with PureVoice AI", key="btn_run_video"):
-                with st.spinner("Suppressing noise and mastering vocals..."):
+            if st.button("✨ Clean & Enhance Video", key="btn_run_video"):
+                with st.spinner("Removing background noise and polishing vocal presence..."):
                     with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{video_file.name}") as tmp_in:
                         tmp_in.write(video_file.read())
                         input_path = tmp_in.name
@@ -246,16 +256,18 @@ with tab_video:
                         input_path=input_path,
                         output_dir=output_dir,
                         preset=chosen_preset,
-                        reduction_level=reduction_depth
+                        reduction_level=reduction_depth,
+                        enhance_voice=enhance_voice_toggle,
+                        voice_enhancement_level=voice_strength
                     )
 
-                    st.success("🎉 Video cleaned successfully!")
+                    st.success("🎉 Video successfully cleaned and enhanced!")
                     st.markdown("#### ✨ Enhanced Studio Video Result:")
                     st.video(res["output_path"])
 
                     with open(res["output_path"], "rb") as f:
                         st.download_button(
-                            label="⬇️ Download Cleaned Video (MP4)",
+                            label="⬇️ Download Enhanced Video (MP4)",
                             data=f,
                             file_name=res["output_file"],
                             mime="video/mp4",
@@ -269,7 +281,7 @@ with tab_video:
 
 # --- TAB 2: AUDIO ---
 with tab_audio:
-    col_audio_up, col_audio_set = st.columns([1.2, 0.8], gap="large")
+    col_audio_up, col_audio_set = st.columns([1.1, 0.9], gap="large")
 
     with col_audio_up:
         st.markdown("#### 1. Upload Audio File")
@@ -284,27 +296,51 @@ with tab_audio:
             st.audio(audio_file)
 
     with col_audio_set:
-        st.markdown("#### 2. Tuning Presets")
-        chosen_audio_preset_label = st.selectbox(
-            "Vocal Enhancement Preset",
-            list(PRESET_MAP.keys()),
-            index=0,
-            key="audio_preset"
-        )
-        chosen_audio_preset = PRESET_MAP[chosen_audio_preset_label]
+        st.markdown("#### 2. Creator Audio Controls")
 
+        # Feature 1: Reduce Noise
+        st.markdown("**🔇 Reduce Noise**")
         reduction_audio_depth = st.slider(
             "Noise Suppression Depth (dB)",
             min_value=6,
             max_value=24,
             value=12,
             step=1,
-            key="audio_slider"
+            key="audio_slider",
+            help="Higher values remove louder noise. 12 dB is ideal for natural voice."
         )
 
+        # Feature 2: Enhance Voice
+        st.markdown("**✨ Enhance Voice**")
+        enhance_audio_toggle = st.toggle(
+            "Enable Studio Voice Polish",
+            value=True,
+            key="audio_enhance_toggle",
+            help="Boosts proximity warmth, 3.4kHz vocal presence, condenser air sheen, and levels speech."
+        )
+
+        voice_audio_strength = 80
+        if enhance_audio_toggle:
+            voice_audio_strength = st.slider(
+                "Voice Enhancement Intensity (%)",
+                min_value=10,
+                max_value=100,
+                value=80,
+                step=5,
+                key="audio_voice_slider"
+            )
+
+        chosen_audio_preset_label = st.selectbox(
+            "Vocal Tone Profile",
+            list(PRESET_MAP.keys()),
+            index=0,
+            key="audio_preset"
+        )
+        chosen_audio_preset = PRESET_MAP[chosen_audio_preset_label]
+
         if audio_file is not None:
-            if st.button("✨ Clean Audio with PureVoice AI", key="btn_run_audio"):
-                with st.spinner("Isolating vocals and removing background noise..."):
+            if st.button("✨ Clean & Enhance Audio", key="btn_run_audio"):
+                with st.spinner("Removing background noise and polishing vocal presence..."):
                     with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{audio_file.name}") as tmp_in:
                         tmp_in.write(audio_file.read())
                         input_path = tmp_in.name
@@ -314,16 +350,18 @@ with tab_audio:
                         input_path=input_path,
                         output_dir=output_dir,
                         preset=chosen_audio_preset,
-                        reduction_level=reduction_audio_depth
+                        reduction_level=reduction_audio_depth,
+                        enhance_voice=enhance_audio_toggle,
+                        voice_enhancement_level=voice_audio_strength
                     )
 
-                    st.success("🎉 Audio cleaned successfully!")
+                    st.success("🎉 Audio successfully cleaned and enhanced!")
                     st.markdown("#### ✨ Enhanced Studio Audio Result:")
                     st.audio(res["output_path"])
 
                     with open(res["output_path"], "rb") as f:
                         st.download_button(
-                            label="⬇️ Download Cleaned Audio (MP3)",
+                            label="⬇️ Download Enhanced Audio (MP3)",
                             data=f,
                             file_name=res["output_file"],
                             mime="audio/mpeg",
