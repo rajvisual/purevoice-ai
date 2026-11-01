@@ -151,6 +151,21 @@ class PureVoiceDenoiser:
                 "acoustic_condition": "Standard Room Profile"
             }
 
+    def get_neural_model_path(self, preset: str = "creator") -> Optional[str]:
+        """Returns the absolute path of the built-in RNNoise neural model file escaped for FFmpeg."""
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        model_file = "bd.rnnn"
+        if preset == "subtle":
+            model_file = "cb.rnnn"
+        elif preset == "podcast":
+            model_file = "bd.rnnn"
+        
+        path = os.path.join(base_dir, "models", model_file)
+        if os.path.exists(path):
+            escaped = path.replace("\\", "/").replace(":", "\\:")
+            return escaped
+        return None
+
     def build_audio_filter(
         self,
         preset: str = "creator",
@@ -159,13 +174,16 @@ class PureVoiceDenoiser:
         voice_enhancement_level: int = 70
     ) -> str:
         """
-        Pristine Studio Vocal Chain (Unified Single-Pass DSP):
-        1. 65Hz High-Pass (Cuts rumble and desk thumps while keeping vocal warmth intact)
-        2. afftdn Noise Reduction (tn=0 avoids voice erosion, gs=8 eliminates musical chirps)
-        3. Instagram-Style Vocal EQ (160Hz warmth, 380Hz notch, 3.2kHz clarity, 10kHz air)
-        4. speechnorm (Applied EXACTLY ONCE at the end for clean, natural broadcast leveling)
+        PureVoice Neural Speech Restoration Engine:
+        1. 48kHz audio formatting
+        2. Gentle high-pass (65Hz cuts wind/thumps without affecting vocal chest warmth)
+        3. RNNoise Recurrent Neural Network (arnndn): isolates speech formants & eliminates background noise
+        4. Studio Vocal EQ (160Hz proximity warmth, 380Hz notch, 3.2kHz clarity, 10kHz air)
+        5. speechnorm (e=1.0: NO breathing/pumping) + alimiter (0% digital clipping)
         """
         filters = []
+
+        filters.append("aformat=sample_fmts=fltp:sample_rates=48000")
 
         # Step 1: Low-cut filter
         if preset == "wind_rumble":
@@ -173,14 +191,20 @@ class PureVoiceDenoiser:
         else:
             filters.append("highpass=f=65")
 
-        # Step 2: Noise reduction (safe, natural range 6-18 dB)
-        safe_nr = max(6, min(int(reduction_level), 18))
-        filters.append(f"afftdn=nr={safe_nr}:nf=-45:tn=0:gs=8")
+        # Step 2: Neural Speech Denoising (RNNoise via FFmpeg arnndn)
+        neural_model = self.get_neural_model_path(preset)
+        if neural_model:
+            # Map reduction_level (6 to 20) to neural blend mix (0.70 to 1.0)
+            mix = max(0.60, min(0.65 + (int(reduction_level) - 6) * 0.025, 1.0))
+            filters.append(f"arnndn=m='{neural_model}':mix={mix:.2f}")
+        else:
+            safe_nr = max(6, min(int(reduction_level), 16))
+            filters.append(f"afftdn=nr={safe_nr}:nf=-50:tn=1:tr=1:gs=6")
 
-        # Step 3: Vocal enhancement EQ (if enabled)
+        # Step 3: Instagram-Style Vocal EQ (if enabled)
         if enhance_voice and voice_enhancement_level > 0:
             factor = max(0.1, min(int(voice_enhancement_level), 100)) / 100.0
-            warmth = round(1.8 * factor, 1)      # 160Hz proximity warmth
+            warmth = round(1.6 * factor, 1)      # 160Hz proximity warmth
             debox = round(-1.4 * factor, 1)      # 380Hz room echo cut
             presence = round(2.0 * factor, 1)    # 3.2kHz speech clarity
             air = round(1.6 * factor, 1)         # 10kHz condenser air sheen
@@ -192,8 +216,9 @@ class PureVoiceDenoiser:
         else:
             filters.append("equalizer=f=3000:t=q:w=1.0:g=1.0")
 
-        # Step 4: Speech Normalizer (Single pass, smooth dynamics)
-        filters.append("speechnorm=p=0.95:e=1.4:c=1.4")
+        # Step 4: Broadcast Normalizer (e=1.0 strictly prevents background noise breathing)
+        filters.append("speechnorm=p=0.95:e=1.0:c=1.2")
+        filters.append("alimiter=limit=0.95")
 
         return ",".join(filters)
 

@@ -190,7 +190,7 @@ def get_denoiser():
 
 denoiser = get_denoiser()
 
-badge_text = "● PUREVOICE NEURAL AI (48kHz Studio Quality)" if denoiser.use_neural_ai else "● PUREVOICE STUDIO AI"
+badge_text = "● PUREVOICE NEURAL AI (RNNoise 48kHz Studio Quality)" if denoiser.get_neural_model_path() else "● PUREVOICE STUDIO AI"
 
 # 3. Header Section
 st.markdown(
