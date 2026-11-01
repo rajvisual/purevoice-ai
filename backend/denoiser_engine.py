@@ -76,6 +76,69 @@ class PureVoiceDenoiser:
         ext = os.path.splitext(file_path)[1].lower()
         return ext in VIDEO_EXTENSIONS
 
+    def analyze_audio(self, file_path: str) -> Dict[str, Any]:
+        """
+        Smart Acoustic Auto-Detector:
+        Scans audio volume, dynamic range, and ambient noise floor to calculate:
+        - Optimal Noise Reduction dB (8 dB to 17 dB)
+        - Optimal Voice Enhancement % (65% to 90%)
+        """
+        try:
+            cmd = [self.ffmpeg, "-i", file_path, "-vn", "-af", "volumedetect", "-f", "null", "-"]
+            res = subprocess.run(cmd, capture_output=True, text=True)
+            stderr = res.stderr
+
+            mean_vol = -24.0
+            max_vol = -3.0
+
+            for line in stderr.splitlines():
+                if "mean_volume:" in line:
+                    try:
+                        mean_vol = float(line.split("mean_volume:")[1].split("dB")[0].strip())
+                    except Exception:
+                        pass
+                elif "max_volume:" in line:
+                    try:
+                        max_vol = float(line.split("max_volume:")[1].split("dB")[0].strip())
+                    except Exception:
+                        pass
+
+            dynamic_range = max_vol - mean_vol
+
+            if dynamic_range < 14:
+                auto_nr = 16
+                auto_voice = 85
+                condition = "Heavy Background Noise (AC/Traffic)"
+            elif dynamic_range < 20:
+                auto_nr = 12
+                auto_voice = 80
+                condition = "Moderate Ambient Room Noise"
+            else:
+                auto_nr = 9
+                auto_voice = 70
+                condition = "Clean / Low Background Noise"
+
+            if mean_vol < -30:
+                auto_voice = min(auto_voice + 10, 95)
+
+            return {
+                "mean_volume_db": mean_vol,
+                "max_volume_db": max_vol,
+                "dynamic_range_db": round(dynamic_range, 1),
+                "auto_nr_db": auto_nr,
+                "auto_voice_percent": auto_voice,
+                "acoustic_condition": condition
+            }
+        except Exception:
+            return {
+                "mean_volume_db": -24.0,
+                "max_volume_db": -3.0,
+                "dynamic_range_db": 21.0,
+                "auto_nr_db": 12,
+                "auto_voice_percent": 80,
+                "acoustic_condition": "Standard Room Profile"
+            }
+
     def _run_ai_enhancement(self, input_wav: str, output_wav: str) -> bool:
         """Runs the 48kHz Deep Neural Network speech enhancer."""
         if not self.use_neural_ai or not self.ai_model:

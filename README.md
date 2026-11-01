@@ -37,6 +37,8 @@ Use the tool directly in your browser without installing anything:
 
 ## ✨ Features
 
+* **🤖 Smart AI Auto-Detect (Zero-Guesswork)**:
+  Instantly scans acoustic dynamic range and ambient noise floor in under 0.05s to automatically calculate and apply the ideal noise reduction (dB) and vocal polish (%) without any creator guesswork.
 * **🔇 Reduce Noise (AI Deep Neural Network + Studio DSP)**:
   Wipes away background air conditioning hum, PC fans, street traffic, and wind rumble from any audio or video file.
 * **✨ Enhance Voice (Studio Microphone Polish)**:

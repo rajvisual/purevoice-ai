@@ -1,7 +1,7 @@
 """
 PureVoice AI - Studio Audio & Video Noise Reducer + Voice Enhancer
 ==================================================================
-Creator-Grade Audio Controls (Reduce Noise + Enhance Voice).
+Creator-Grade Audio Controls (Smart Auto-Detect + Manual Studio Sliders).
 """
 
 import os
@@ -167,7 +167,7 @@ st.markdown(
         <div class="badge-pill">{badge_text}</div>
         <div class="main-title">Crystal-Clear Audio with <span class="gradient-text">PureVoice AI</span></div>
         <div class="subtitle">
-            Reduce background noise and enhance human speech with studio microphone clarity.
+            Auto-detect background noise and enhance human speech with studio microphone clarity.
         </div>
     </div>
     """,
@@ -200,56 +200,77 @@ with tab_video:
             st.video(video_file)
 
     with col_settings:
-        st.markdown("#### 2. Creator Audio Controls")
+        st.markdown("#### 2. Creator Audio Mode")
 
-        # Feature 1: Reduce Noise
-        st.markdown("**🔇 Reduce Noise**")
-        reduction_depth = st.slider(
-            "Noise Suppression Depth (dB)",
-            min_value=6,
-            max_value=24,
-            value=12,
-            step=1,
-            key="video_slider",
-            help="Higher values remove louder noise. 12 dB is ideal for natural voice."
+        video_mode = st.radio(
+            "Video Mode",
+            ["🤖 Smart Auto-Detect (Auto-calculates optimal dB & %)", "🎛️ Manual Sliders"],
+            index=0,
+            horizontal=True,
+            key="video_mode_choice"
         )
 
-        # Feature 2: Enhance Voice (Exact Instagram Edit feature!)
-        st.markdown("**✨ Enhance Voice**")
-        enhance_voice_toggle = st.toggle(
-            "Enable Studio Voice Polish",
-            value=True,
-            key="video_enhance_toggle",
-            help="Boosts proximity warmth, 3.4kHz vocal presence, condenser air sheen, and levels speech."
-        )
+        is_auto_video = ("Auto" in video_mode)
 
-        voice_strength = 80
-        if enhance_voice_toggle:
-            voice_strength = st.slider(
-                "Voice Enhancement Intensity (%)",
-                min_value=10,
-                max_value=100,
-                value=80,
-                step=5,
-                key="video_voice_slider"
+        if is_auto_video:
+            st.info("💡 **Smart Auto Active**: The AI will scan your audio's dynamic range and noise floor to automatically compute the exact noise reduction dB and vocal enhancement % needed.")
+            reduction_depth = 12
+            enhance_voice_toggle = True
+            voice_strength = 80
+            chosen_preset = "creator"
+        else:
+            st.markdown("**🔇 Reduce Noise**")
+            reduction_depth = st.slider(
+                "Noise Suppression Depth (dB)",
+                min_value=6,
+                max_value=24,
+                value=12,
+                step=1,
+                key="video_slider"
             )
 
-        chosen_preset_label = st.selectbox(
-            "Vocal Tone Profile",
-            list(PRESET_MAP.keys()),
-            index=0,
-            key="video_preset"
-        )
-        chosen_preset = PRESET_MAP[chosen_preset_label]
+            st.markdown("**✨ Enhance Voice**")
+            enhance_voice_toggle = st.toggle(
+                "Enable Studio Voice Polish",
+                value=True,
+                key="video_enhance_toggle"
+            )
+
+            voice_strength = 80
+            if enhance_voice_toggle:
+                voice_strength = st.slider(
+                    "Voice Enhancement Intensity (%)",
+                    min_value=10,
+                    max_value=100,
+                    value=80,
+                    step=5,
+                    key="video_voice_slider"
+                )
+
+            chosen_preset_label = st.selectbox(
+                "Vocal Tone Profile",
+                list(PRESET_MAP.keys()),
+                index=0,
+                key="video_preset"
+            )
+            chosen_preset = PRESET_MAP[chosen_preset_label]
 
         st.caption("⚡ **Lossless Remuxing**: Your video stream is never re-compressed. Only audio is enhanced, preserving 100% 4K/60FPS video quality.")
 
         if video_file is not None:
             if st.button("✨ Clean & Enhance Video", key="btn_run_video"):
-                with st.spinner("Removing background noise and polishing vocal presence..."):
+                with st.spinner("Analyzing acoustics and processing video..."):
                     with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{video_file.name}") as tmp_in:
                         tmp_in.write(video_file.read())
                         input_path = tmp_in.name
+
+                    # Run Smart Auto-Detection if enabled
+                    if is_auto_video:
+                        analysis = denoiser.analyze_audio(input_path)
+                        reduction_depth = analysis["auto_nr_db"]
+                        voice_strength = analysis["auto_voice_percent"]
+                        enhance_voice_toggle = True
+                        st.info(f"🎯 **AI Auto-Tuned**: {analysis['acoustic_condition']} • Applied {reduction_depth} dB Noise Cut & {voice_strength}% Vocal Polish")
 
                     output_dir = os.path.join(BASE_DIR, "outputs")
                     res = denoiser.process_file(
@@ -296,54 +317,75 @@ with tab_audio:
             st.audio(audio_file)
 
     with col_audio_set:
-        st.markdown("#### 2. Creator Audio Controls")
+        st.markdown("#### 2. Creator Audio Mode")
 
-        # Feature 1: Reduce Noise
-        st.markdown("**🔇 Reduce Noise**")
-        reduction_audio_depth = st.slider(
-            "Noise Suppression Depth (dB)",
-            min_value=6,
-            max_value=24,
-            value=12,
-            step=1,
-            key="audio_slider",
-            help="Higher values remove louder noise. 12 dB is ideal for natural voice."
+        audio_mode = st.radio(
+            "Audio Mode",
+            ["🤖 Smart Auto-Detect (Auto-calculates optimal dB & %)", "🎛️ Manual Sliders"],
+            index=0,
+            horizontal=True,
+            key="audio_mode_choice"
         )
 
-        # Feature 2: Enhance Voice
-        st.markdown("**✨ Enhance Voice**")
-        enhance_audio_toggle = st.toggle(
-            "Enable Studio Voice Polish",
-            value=True,
-            key="audio_enhance_toggle",
-            help="Boosts proximity warmth, 3.4kHz vocal presence, condenser air sheen, and levels speech."
-        )
+        is_auto_audio = ("Auto" in audio_mode)
 
-        voice_audio_strength = 80
-        if enhance_audio_toggle:
-            voice_audio_strength = st.slider(
-                "Voice Enhancement Intensity (%)",
-                min_value=10,
-                max_value=100,
-                value=80,
-                step=5,
-                key="audio_voice_slider"
+        if is_auto_audio:
+            st.info("💡 **Smart Auto Active**: The AI will scan your audio's dynamic range and noise floor to automatically compute the exact noise reduction dB and vocal enhancement % needed.")
+            reduction_audio_depth = 12
+            enhance_audio_toggle = True
+            voice_audio_strength = 80
+            chosen_audio_preset = "creator"
+        else:
+            st.markdown("**🔇 Reduce Noise**")
+            reduction_audio_depth = st.slider(
+                "Noise Suppression Depth (dB)",
+                min_value=6,
+                max_value=24,
+                value=12,
+                step=1,
+                key="audio_slider"
             )
 
-        chosen_audio_preset_label = st.selectbox(
-            "Vocal Tone Profile",
-            list(PRESET_MAP.keys()),
-            index=0,
-            key="audio_preset"
-        )
-        chosen_audio_preset = PRESET_MAP[chosen_audio_preset_label]
+            st.markdown("**✨ Enhance Voice**")
+            enhance_audio_toggle = st.toggle(
+                "Enable Studio Voice Polish",
+                value=True,
+                key="audio_enhance_toggle"
+            )
+
+            voice_audio_strength = 80
+            if enhance_audio_toggle:
+                voice_audio_strength = st.slider(
+                    "Voice Enhancement Intensity (%)",
+                    min_value=10,
+                    max_value=100,
+                    value=80,
+                    step=5,
+                    key="audio_voice_slider"
+                )
+
+            chosen_audio_preset_label = st.selectbox(
+                "Vocal Tone Profile",
+                list(PRESET_MAP.keys()),
+                index=0,
+                key="audio_preset"
+            )
+            chosen_audio_preset = PRESET_MAP[chosen_audio_preset_label]
 
         if audio_file is not None:
             if st.button("✨ Clean & Enhance Audio", key="btn_run_audio"):
-                with st.spinner("Removing background noise and polishing vocal presence..."):
+                with st.spinner("Analyzing acoustics and processing audio..."):
                     with tempfile.NamedTemporaryFile(delete=False, suffix=f"_{audio_file.name}") as tmp_in:
                         tmp_in.write(audio_file.read())
                         input_path = tmp_in.name
+
+                    # Run Smart Auto-Detection if enabled
+                    if is_auto_audio:
+                        analysis = denoiser.analyze_audio(input_path)
+                        reduction_audio_depth = analysis["auto_nr_db"]
+                        voice_audio_strength = analysis["auto_voice_percent"]
+                        enhance_audio_toggle = True
+                        st.info(f"🎯 **AI Auto-Tuned**: {analysis['acoustic_condition']} • Applied {reduction_audio_depth} dB Noise Cut & {voice_audio_strength}% Vocal Polish")
 
                     output_dir = os.path.join(BASE_DIR, "outputs")
                     res = denoiser.process_file(
