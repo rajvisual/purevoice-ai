@@ -1,9 +1,2 @@
-# Streamlit Community Cloud
 streamlit>=1.32.0
 imageio-ffmpeg>=0.4.9
-
-# Alternative frameworks
-gradio>=4.20.0
-fastapi>=0.110.0
-uvicorn>=0.28.0
-python-multipart>=0.0.9
